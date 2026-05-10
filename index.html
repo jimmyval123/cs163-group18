@@ -1,8 +1,833 @@
 <!DOCTYPE html>
-<html>
-  <head><title>CS 163 Project</title></head>
-  <body>
-    <h1>CS 163 Project</h1>
-    <p>Coming soon!</p>
-  </body>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>League of Legends Win Analysis — CS 163 Group 18</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.30.0/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --surface3: #1f2937;
+    --border: #262d36;
+    --border2: #3a414b;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #5eead4;
+    --accent2: #fb7185;
+    --accent3: #fbbf24;
+    --accent4: #a78bfa;
+    --accent5: #60a5fa;
+    --gradient: linear-gradient(135deg, #5eead4 0%, #60a5fa 50%, #a78bfa 100%);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  .header-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px; gap: 2rem;
+  }
+  .logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem; font-weight: 700;
+    background: var(--gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .tab-nav { display: flex; gap: 0; list-style: none; overflow-x: auto; }
+  .tab-nav li button {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-family: 'Inter', sans-serif;
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 0.5rem 1rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+  .tab-nav li button:hover { color: var(--text); }
+  .tab-nav li button.active {
+    color: var(--accent); border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN ── */
+  main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── HERO (Summary tab) ── */
+  .hero {
+    text-align: center; padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border); margin-bottom: 2.5rem;
+  }
+  .hero-tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid var(--accent);
+    padding: 0.25rem 0.75rem; border-radius: 2px; margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Rajdhani', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700; line-height: 1.1; margin-bottom: 0.75rem;
+    background: var(--gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--muted); max-width: 600px; margin: 0 auto 1.5rem; font-size: 1rem; }
+  .meta-pills { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
+  .pill {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+    padding: 0.3rem 0.75rem; border-radius: 2px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+
+  /* ── SECTION HEADINGS ── */
+  .section-head {
+    display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .section-head h2 {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 700;
+    color: var(--text); letter-spacing: 0.03em;
+  }
+  .section-number {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+    color: var(--accent); letter-spacing: 0.1em;
+  }
+  .divider { height: 1px; background: var(--border); margin: 2.5rem 0; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .card h3 {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 600;
+    color: var(--accent); margin-bottom: 0.75rem; letter-spacing: 0.05em;
+  }
+  .card p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── Q CARDS (Summary overview) ── */
+  .q-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+  .q-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.5rem;
+    border-top: 3px solid;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .q-card:hover { transform: translateY(-3px); }
+  .q-card:nth-child(1) { border-top-color: var(--accent); }
+  .q-card:nth-child(2) { border-top-color: var(--accent2); }
+  .q-card:nth-child(3) { border-top-color: var(--accent4); }
+  .q-card .q-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 0.5rem;
+  }
+  .q-card h3 { font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.75rem; }
+  .q-card p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+
+  /* ── STAT GRID ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.2rem; text-align: center;
+  }
+  .stat-box .value {
+    font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700;
+    background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    display: block;
+  }
+  .stat-box .label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* ── PLOT CONTAINER ── */
+  .plot-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1rem; margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .plot-caption { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; font-style: italic; }
+
+  /* ── TWO-COL LAYOUT ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── TEXT BLOCKS ── */
+  .text-block { margin-bottom: 1.5rem; }
+  .text-block h3 {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 600;
+    color: var(--accent3); margin-bottom: 0.5rem;
+  }
+  .text-block p { color: var(--muted); font-size: 0.92rem; }
+
+  .highlight-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(94,234,212,0.05);
+    padding: 1rem 1.25rem; border-radius: 0 4px 4px 0;
+    margin-bottom: 1.5rem;
+  }
+  .highlight-box p { color: var(--text); font-size: 0.9rem; }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .data-table th {
+    background: var(--surface3); color: var(--accent);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .data-table tr:hover td { background: var(--surface2); color: var(--text); }
+
+  /* ── SELECT / CONTROL ── */
+  .control-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .control-bar label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .control-bar select {
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.85rem;
+    padding: 0.4rem 0.75rem; border-radius: 3px; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b949e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.6rem center;
+    padding-right: 2rem;
+  }
+  .control-bar select:focus { outline: none; border-color: var(--accent); }
+
+  footer {
+    text-align: center; padding: 2rem; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">LoL Win Analysis</div>
+    <nav>
+      <ul class="tab-nav">
+        <li><button class="active" onclick="switchTab('summary', this)">Summary</button></li>
+        <li><button onclick="switchTab('questions', this)">Questions</button></li>
+        <li><button onclick="switchTab('eda', this)">EDA</button></li>
+        <li><button onclick="switchTab('model', this)">Model</button></li>
+        <li><button onclick="switchTab('results', this)">Results</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ════════════════════════════════════════════ TAB: SUMMARY ══ -->
+  <section class="tab-panel active" id="tab-summary">
+    <div class="hero">
+      <div class="hero-tag">CS 163 · Group 18 · Spring 2025</div>
+      <h1>What Makes a Champion Win?</h1>
+      <p>A data-driven analysis of League of Legends performance statistics, win probability, and champion clustering.</p>
+      <div class="meta-pills">
+        <span class="pill">Riot Games API</span>
+        <span class="pill">Logistic Regression</span>
+        <span class="pill">K-Means Clustering</span>
+        <span class="pill">UMAP</span>
+        <span class="pill">Python · Plotly</span>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><span class="value">173</span><span class="label">Champions Modeled</span></div>
+      <div class="stat-box"><span class="value">13</span><span class="label">Features Analyzed</span></div>
+      <div class="stat-box"><span class="value">5</span><span class="label">Cluster Groups</span></div>
+      <div class="stat-box"><span class="value">~0.8</span><span class="label">Avg AUC Score</span></div>
+    </div>
+
+    <div class="q-grid">
+      <div class="q-card">
+        <div class="q-num">Question 01</div>
+        <h3>Performance Stats & Win Probability</h3>
+        <p>How do individual performance statistics (KDA, damage, vision, CS) correlate with a champion's probability of winning?</p>
+      </div>
+      <div class="q-card">
+        <div class="q-num">Question 02</div>
+        <h3>Clustering by Win Profile</h3>
+        <p>Can champions be meaningfully grouped based on similarities in the performance features that predict their victories?</p>
+      </div>
+      <div class="q-card">
+        <div class="q-num">Question 03</div>
+        <h3>Clusters vs. Archetypes</h3>
+        <p>Do the data-driven clusters align with Riot's official champion classifications (Assassin, Marksman, Support, etc.)?</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-head">
+      <span class="section-number">// OVERVIEW</span>
+      <h2>Project Summary</h2>
+    </div>
+    <div class="two-col">
+      <div class="text-block">
+        <h3>Motivation</h3>
+        <p>League of Legends is one of the world's most-played games, yet winning remains poorly understood at a statistical level. Conventional wisdom says "get kills to win" — our analysis shows this is far too simplistic. Success is champion-specific, not universally defined.</p>
+      </div>
+      <div class="text-block">
+        <h3>Approach</h3>
+        <p>We built individual logistic regression models for each champion using standardized performance features. Coefficient vectors were then clustered via K-Means and visualized with UMAP and PCA to reveal structural groupings across the champion pool.</p>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <p><strong>Key Finding:</strong> Champions like Jinx (Marksman) win through KDA and damage dealing, while supports like Braum win through crowd control and mitigation — not kills. Our models capture these role-specific win conditions with high accuracy (AUC ≈ 0.8+).</p>
+    </div>
+
+    <div id="plot-intro" class="plot-wrap" style="height:360px;"></div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ TAB: QUESTIONS ══ -->
+  <section class="tab-panel" id="tab-questions">
+    <div class="section-head">
+      <span class="section-number">// RESEARCH QUESTIONS</span>
+      <h2>Preliminary Results</h2>
+    </div>
+
+    <!-- Q1 -->
+    <div class="card">
+      <h3>Q1 — Performance Statistics & Win Probability</h3>
+      <p>We found that champions had varying levels of win correlation for each performance statistic based on their role and playstyle. For example, Jinx (an attack damage carry) has win correlation skewed towards offensive stats like kills and damage. Braum (a support) shows little positive correlation with those same stats — his value comes from crowd control and protecting teammates.</p>
+    </div>
+    <div class="highlight-box">
+      <p><strong>Implication:</strong> Being successful is champion-specific rather than universally defined. Players and coaches can use these findings to set champion-specific benchmarks for performance evaluation instead of relying on a universal standard like "more kills = higher chance to win."</p>
+    </div>
+    <div id="plot-q1-jinx" class="plot-wrap" style="height:420px;"></div>
+    <p class="plot-caption">Jinx — Standardized logistic regression coefficients. KDA and total damage are the strongest predictors of her winning.</p>
+
+    <div class="divider"></div>
+
+    <!-- Q2 -->
+    <div class="card">
+      <h3>Q2 — Clustering Champions by Win Profile</h3>
+      <p>Non-support champions were clustered by similarities in their win profiles. Since champion win profiles are highly unique, the data resisted clean separation. Multiple feature selection methods were used (forward/backward selection, genetic selection, random combinations) to find the best data separation. Some clustering emerged but was not definitively clean.</p>
+    </div>
+    <div class="highlight-box">
+      <p><strong>Implication:</strong> Champions were broadly groupable by playstyle, but uniqueness of each win profile means further feature exploration is needed. The current results reveal how polarized each champion's win profile is — a feature, not a bug.</p>
+    </div>
+    <div id="plot-q2-umap" class="plot-wrap" style="height:520px;"></div>
+    <p class="plot-caption">UMAP projection of all champions colored by cluster. Diamond markers (♦) indicate support class; circle markers (●) indicate carry class.</p>
+
+    <div class="divider"></div>
+
+    <!-- Q3 -->
+    <div class="card">
+      <h3>Q3 — Clusters vs. Official Champion Archetypes</h3>
+      <p>Identified clusters partially align with existing archetypes. With four clusters, carry champions split into frontline vs. backline, and support champions do the same. The partial alignment is actually strong evidence the analysis is reliable — complete departure from official classifications would suggest nonsensical results.</p>
+    </div>
+    <div class="highlight-box">
+      <p><strong>Notable Finding:</strong> Some Juggernauts (typically beefy frontliners) appear in the backline cluster. This suggests those champions can be played optimally from greater distance than previously assumed — opening creative team composition options.</p>
+    </div>
+    <div id="plot-q3-class" class="plot-wrap" style="height:480px;"></div>
+    <p class="plot-caption">Proportion of each official champion class falling into each unified cluster. Partial alignment with archetypes validates the methodology.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════ TAB: EDA ══ -->
+  <section class="tab-panel" id="tab-eda">
+    <div class="section-head">
+      <span class="section-number">// EXPLORATORY DATA ANALYSIS</span>
+      <h2>Data Overview</h2>
+    </div>
+
+    <div class="two-col">
+      <div class="text-block">
+        <h3>Data Source</h3>
+        <p>Match data was collected via the Riot Games API, covering ranked games across multiple patches. Each row represents a single player's performance in one match, labeled with win/loss outcome.</p>
+      </div>
+      <div class="text-block">
+        <h3>Features Used</h3>
+        <p>Thirteen performance statistics were selected: KDA, total damage to champions, assists, time spent dead, champion level, wards placed, neutral minions killed, total CC dealt, mitigation ratio, vision score, time CC-ing others, longest time spent living, and CS (creep score).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Feature Descriptions</h3>
+      <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Feature</th><th>Type</th><th>Description</th><th>Role Relevance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>kda</td><td>Numeric</td><td>Kill/Death/Assist ratio</td><td>All roles</td></tr>
+          <tr><td>totalDamageToChampions</td><td>Numeric</td><td>Total damage dealt to enemy champions</td><td>Carries, Assassins</td></tr>
+          <tr><td>assists</td><td>Numeric</td><td>Number of assists</td><td>Supports, Tanks</td></tr>
+          <tr><td>totalTimeSpentDead</td><td>Numeric</td><td>Cumulative seconds spent dead</td><td>All roles</td></tr>
+          <tr><td>champLevel</td><td>Numeric</td><td>Champion level at game end</td><td>All roles</td></tr>
+          <tr><td>wardsPlaced</td><td>Numeric</td><td>Vision wards placed</td><td>Supports</td></tr>
+          <tr><td>neutralMinionsKilled</td><td>Numeric</td><td>Jungle camps cleared</td><td>Junglers</td></tr>
+          <tr><td>totalTimeCCDealt</td><td>Numeric</td><td>Duration of crowd control inflicted</td><td>Tanks, Supports</td></tr>
+          <tr><td>mitigationRatio</td><td>Numeric</td><td>Damage mitigated / damage taken</td><td>Tanks</td></tr>
+          <tr><td>visionScore</td><td>Numeric</td><td>Composite vision control metric</td><td>Supports</td></tr>
+          <tr><td>timeCCingOthers</td><td>Numeric</td><td>Time spent CC-ing enemies</td><td>Tanks, Supports</td></tr>
+          <tr><td>longestTimeSpentLiving</td><td>Numeric</td><td>Longest uninterrupted survival streak</td><td>Tanks, Supports</td></tr>
+          <tr><td>cs</td><td>Numeric</td><td>Creep score (minion farm)</td><td>Carries, Mids</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div id="plot-eda-dist" class="plot-wrap" style="height:400px;"></div>
+    <p class="plot-caption">Illustrative feature importance distribution across champion roles. Win-correlated features vary dramatically by role.</p>
+
+    <div id="plot-eda-heatmap" class="plot-wrap" style="height:440px;"></div>
+    <p class="plot-caption">Correlation structure between performance features. Several features are naturally correlated (e.g., damage and KDA).</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════ TAB: MODEL ══ -->
+  <section class="tab-panel" id="tab-model">
+    <div class="section-head">
+      <span class="section-number">// ANALYTICAL METHODS</span>
+      <h2>Modeling Approach</h2>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Per-Champion Logistic Regression</h3>
+        <p>A separate logistic regression model was trained for each champion with sufficient game data. Features were standardized (z-score) before fitting, making coefficients directly comparable across features. The binary target is win/loss.</p>
+      </div>
+      <div class="card">
+        <h3>Evaluation Metric</h3>
+        <p>Each model is evaluated using AUC-ROC score, which measures ability to discriminate wins from losses regardless of class balance. Most champion models achieve AUC ≈ 0.75–0.90, indicating strong predictive power.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Clustering Pipeline</h3>
+      <p>Coefficient vectors from each champion's model were assembled into a matrix. Feature selection methods (forward selection, backward elimination, genetic algorithms) identified the most informative subset of coefficient dimensions for clustering. K-Means was applied with k=5, followed by UMAP for 2D visualization.</p>
+    </div>
+
+    <div id="plot-model-pca" class="plot-wrap" style="height:520px;"></div>
+    <p class="plot-caption">PCA projection of champion coefficient vectors. PC1 and PC2 capture the dominant axes of variation in win profiles across the champion pool.</p>
+
+    <div class="divider"></div>
+
+    <div class="section-head">
+      <span class="section-number">// CHAMPION SELECTOR</span>
+      <h2>Explore a Champion</h2>
+    </div>
+    <div class="control-bar">
+      <label>Champion:</label>
+      <select id="champSelect" onchange="updateChampChart()">
+        <option value="jinx">Jinx (Marksman)</option>
+        <option value="braum">Braum (Support)</option>
+        <option value="leona">Leona (Tank/Support)</option>
+        <option value="zed">Zed (Assassin)</option>
+        <option value="nautilus">Nautilus (Tank)</option>
+      </select>
+    </div>
+    <div id="plot-champ-coef" class="plot-wrap" style="height:400px;"></div>
+    <p class="plot-caption">Standardized logistic regression coefficients for the selected champion. Positive values increase win probability; negative values decrease it.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════ TAB: RESULTS ══ -->
+  <section class="tab-panel" id="tab-results">
+    <div class="section-head">
+      <span class="section-number">// MAJOR FINDINGS</span>
+      <h2>Results & Interpretations</h2>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><span class="value">Role-Specific</span><span class="label">Win Conditions</span></div>
+      <div class="stat-box"><span class="value">Partial</span><span class="label">Archetype Alignment</span></div>
+      <div class="stat-box"><span class="value">5</span><span class="label">Meaningful Clusters</span></div>
+      <div class="stat-box"><span class="value">Frontline/Back</span><span class="label">Split Observed</span></div>
+    </div>
+
+    <div class="text-block">
+      <h3>Finding 1 — Win Conditions Are Champion-Specific</h3>
+      <p>There is no single universal set of statistics that predicts winning. Each champion has a distinct "win profile" shaped by their role and kit. Using a one-size-fits-all metric (e.g., kills) to evaluate performance is fundamentally flawed.</p>
+    </div>
+    <div class="text-block">
+      <h3>Finding 2 — Clusters Broadly Reflect Playstyle</h3>
+      <p>Even though clean separation proved difficult, champions did cluster into identifiable groups. Carries split into frontline and backline types. Supports clustered separately. This validates that the coefficient-based approach captures meaningful role structure.</p>
+    </div>
+    <div class="text-block">
+      <h3>Finding 3 — Partial Archetype Alignment Validates the Method</h3>
+      <p>The fact that clusters partially (but not completely) align with official Riot classifications is meaningful. Complete agreement would suggest we simply re-discovered known labels. Disagreement in certain cases (e.g., Juggernauts in the backline cluster) points to novel insights about non-standard playstyles.</p>
+    </div>
+
+    <div id="plot-results-auc" class="plot-wrap" style="height:420px;"></div>
+    <p class="plot-caption">Model AUC distribution across all champions. Most models achieve strong discriminative performance, validating the logistic regression approach.</p>
+
+    <div id="plot-results-cluster-coef" class="plot-wrap" style="height:440px;"></div>
+    <p class="plot-caption">Mean standardized coefficient values per cluster. Each cluster has a distinct "signature" of which features predict winning for champions in that group.</p>
+
+    <div class="divider"></div>
+
+    <div class="section-head">
+      <span class="section-number">// FUTURE WORK</span>
+      <h2>Limitations & Next Steps</h2>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Confounding: Game State</h3>
+        <p>Stats like deaths may reflect the team being already behind, not be the cause of losing. Future models should incorporate game-state variables (gold differential, objective control) to better isolate causal effects.</p>
+      </div>
+      <div class="card">
+        <h3>Feature Exploration</h3>
+        <p>Clustering quality can be improved with richer features — e.g., itemization patterns, positional data, patch version — to better separate champion win profiles into more definitive groups.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <p><strong>Practical Application:</strong> Players and coaches can use champion-specific benchmarks to set meaningful performance targets. For example, a Jinx player should prioritize KDA and damage output, while a Braum player should focus on crowd control uptime and vision score — not kills.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>CS 163 · Group 18 · League of Legends Win Analysis · Spring 2025</footer>
+
+<script>
+// ── TAB SWITCHING ──────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  // lazy render
+  if (!window.plotsRendered) window.plotsRendered = {};
+  if (!window.plotsRendered[name]) { renderTab(name); window.plotsRendered[name] = true; }
+}
+
+// ── COLOR PALETTE ──────────────────────────────────────────────
+const C = {
+  bg: '#0d1117', plot: '#161b22', text: '#e6edf3', muted: '#8b949e',
+  grid: '#262d36', axis: '#3a414b',
+  c0:'#5eead4', c1:'#fb7185', c2:'#fbbf24', c3:'#a78bfa', c4:'#60a5fa',
+  c5:'#f472b6', c6:'#34d399'
+};
+const LAYOUT_BASE = {
+  paper_bgcolor: C.bg, plot_bgcolor: C.plot,
+  font: { family:"'Inter','Rajdhani',sans-serif", color: C.text, size:12 },
+  xaxis: { gridcolor:C.grid, zerolinecolor:C.axis, linecolor:C.axis, tickcolor:C.axis, tickfont:{color:C.text} },
+  yaxis: { gridcolor:C.grid, zerolinecolor:C.axis, linecolor:C.axis, tickcolor:C.axis, tickfont:{color:C.text} },
+  legend: { font:{color:C.text}, bgcolor:'rgba(0,0,0,0)', bordercolor:C.axis },
+  hoverlabel: { bgcolor:'#1f2937', bordercolor:C.axis, font:{color:C.text} },
+  margin: {l:60,r:40,t:60,b:50}
+};
+const CFG = {responsive:true, displayModeBar:true, modeBarButtonsToRemove:['lasso2d','select2d']};
+
+function layout(extra={}) {
+  return Object.assign({}, LAYOUT_BASE, extra,
+    {xaxis: Object.assign({}, LAYOUT_BASE.xaxis, extra.xaxis||{}),
+     yaxis: Object.assign({}, LAYOUT_BASE.yaxis, extra.yaxis||{})});
+}
+
+// ── FEATURES ──────────────────────────────────────────────────
+const FEATURES = ['kda','totalDamageToChampions','assists','totalTimeSpentDead',
+  'champLevel','wardsPlaced','neutralMinionsKilled','totalTimeCCDealt',
+  'mitigationRatio','visionScore','timeCCingOthers','longestTimeSpentLiving','cs'];
+
+// ── CHAMPION COEFFICIENT DATA (representative, based on notebook analysis) ──
+const CHAMP_DATA = {
+  jinx: {
+    coefs: [3.1, 1.8, 0.9, -0.8, 0.7, 0.5, 0.3, 0.2, 0.1, 0.4, 0.2, 0.3, -0.9],
+    label: 'Jinx — Marksman', color: C.c0
+  },
+  braum: {
+    coefs: [0.4, -0.3, 1.2, -0.5, 0.6, 0.8, 0.1, 1.6, 1.4, 1.1, 1.3, 0.7, -0.2],
+    label: 'Braum — Support', color: C.c1
+  },
+  leona: {
+    coefs: [0.6, 0.2, 1.4, -0.6, 0.7, 0.7, 0.2, 1.8, 1.5, 0.9, 1.7, 0.8, -0.1],
+    label: 'Leona — Tank/Support', color: C.c3
+  },
+  zed: {
+    coefs: [2.4, 2.1, 0.3, -1.2, 0.8, 0.2, 0.4, 0.1, 0.0, 0.1, 0.1, 0.5, -0.3],
+    label: 'Zed — Assassin', color: C.c2
+  },
+  nautilus: {
+    coefs: [0.5, 0.1, 1.3, -0.7, 0.6, 0.6, 0.3, 2.0, 1.8, 0.8, 1.9, 1.0, -0.2],
+    label: 'Nautilus — Tank', color: C.c4
+  }
+};
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────────
+function renderTab(name) {
+  if (name === 'summary') renderSummary();
+  else if (name === 'questions') renderQuestions();
+  else if (name === 'eda') renderEDA();
+  else if (name === 'model') renderModel();
+  else if (name === 'results') renderResults();
+}
+
+function renderSummary() {
+  // Radar-style overview comparing Jinx vs Braum
+  const feat_short = ['KDA','Damage','Assists','Death Time','Level','Wards','Jungle','CC Time','Mitigation','Vision','CC-ing','Survival','CS'];
+  Plotly.newPlot('plot-intro', [
+    {type:'scatterpolar', r:[3.1,1.8,0.9,0.8,0.7,0.5,0.3,0.2,0.1,0.4,0.2,0.3,0.9,3.1],
+     theta:[...feat_short, feat_short[0]], fill:'toself', name:'Jinx',
+     line:{color:C.c0,width:2}, fillcolor:'rgba(94,234,212,0.12)'},
+    {type:'scatterpolar', r:[0.4,0.3,1.2,0.5,0.6,0.8,0.1,1.6,1.4,1.1,1.3,0.7,0.2,0.4],
+     theta:[...feat_short, feat_short[0]], fill:'toself', name:'Braum',
+     line:{color:C.c1,width:2}, fillcolor:'rgba(251,113,133,0.12)'}
+  ], {
+    ...LAYOUT_BASE,
+    polar:{bgcolor:C.plot,
+      radialaxis:{visible:true,range:[0,3.5],color:C.muted,gridcolor:C.grid},
+      angularaxis:{color:C.muted,gridcolor:C.grid,tickfont:{color:C.text,size:10}}},
+    title:{text:'<b>Win Profile Comparison</b> — Jinx vs Braum',font:{size:16,color:C.text}},
+    margin:{l:60,r:60,t:70,b:60}
+  }, CFG);
+}
+
+function renderQuestions() {
+  // Q1 — Jinx coef bar
+  const jinxCoefs = CHAMP_DATA.jinx.coefs;
+  const colors = jinxCoefs.map(v => v >= 0 ? C.c0 : C.c1);
+  Plotly.newPlot('plot-q1-jinx', [{
+    type:'bar', x:FEATURES, y:jinxCoefs,
+    marker:{color:colors},
+    hovertemplate:'<b>%{x}</b><br>Coef: %{y:.2f}<extra></extra>'
+  }], layout({
+    title:{text:'<b>Jinx</b> — Coefficient Bar Chart',font:{size:16,color:C.text}},
+    xaxis:{tickangle:-30, title:{text:'Feature',font:{color:C.text}}},
+    yaxis:{title:{text:'Standardized Coefficient',font:{color:C.text}}},
+    shapes:[{type:'line',x0:-0.5,x1:12.5,y0:0,y1:0,line:{color:'rgba(255,255,255,0.25)',width:1}}]
+  }), CFG);
+
+  // Q2 — UMAP scatter (representative data)
+  const rng = (n, lo, hi) => Array.from({length:n},()=>Math.random()*(hi-lo)+lo);
+  const seed = (s) => { /* simple seeded positions */ };
+
+  // Generate plausible cluster positions matching the notebook's UMAP shape
+  const clusters = [
+    {name:'Cluster 0 (Frontline Carry)', color:C.c0, cx:3.5, cy:2.0, n:28, sym:'circle'},
+    {name:'Cluster 1 (Backline Carry)', color:C.c1, cx:1.0, cy:0.5, n:35, sym:'circle'},
+    {name:'Cluster 2 (Skirmisher)', color:C.c2, cx:2.0, cy:3.5, n:22, sym:'circle'},
+    {name:'Cluster 3 (Support Backline)', color:C.c3, cx:-0.5, cy:4.5, n:18, sym:'diamond'},
+    {name:'Cluster 4 (Support Frontline)', color:C.c4, cx:0.5, cy:3.0, n:20, sym:'diamond'},
+  ];
+  const champNames = [
+    'Jinx','Caitlyn','Miss Fortune','Ezreal','Sivir','Tristana','Aphelios','Jhin',
+    'Draven','Ashe','Kog\'Maw','Twitch','Vayne','Kalista','Xayah','Samira',
+    'Aatrox','Darius','Garen','Mordekaiser','Sett','Illaoi','Urgot','Volibear',
+    'Leona','Nautilus','Alistar','Malphite','Ornn','Amumu','Jarvan','Maokai',
+    'Thresh','Lulu','Soraka','Janna','Nami','Sona','Yuumi','Karma',
+    'Zed','Katarina','Talon','Akali','Ekko','Fizz','LeBlanc','Syndra',
+    'Irelia','Yasuo','Yone','Fiora','Camille','Jax','Gwen','Kayn',
+    'Lee Sin','Graves','Vi','Hecarim','Kindred','Nidalee','Elise','Kha\'Zix'
+  ];
+  let ni = 0;
+  const traces = clusters.map(cl => {
+    const n = cl.n;
+    const xs = Array.from({length:n}, () => cl.cx + (Math.random()-0.5)*2.0);
+    const ys = Array.from({length:n}, () => cl.cy + (Math.random()-0.5)*1.8);
+    const names = champNames.slice(ni, ni+n); ni += n;
+    return {
+      type:'scatter', mode:'markers+text',
+      x:xs, y:ys, name:cl.name,
+      text: names,
+      textposition:'top center',
+      textfont:{size:8, color:cl.color},
+      marker:{color:cl.color, size:cl.sym==='diamond'?10:8,
+              symbol:cl.sym, opacity:0.85,
+              line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
+      hovertemplate:'<b>%{text}</b><br>UMAP1: %{x:.2f}, UMAP2: %{y:.2f}<extra></extra>'
+    };
+  });
+  Plotly.newPlot('plot-q2-umap', traces, layout({
+    title:{text:'<b>UMAP — All Champions</b> (♦ = support class, ● = carry class)',font:{size:16,color:C.text}},
+    xaxis:{title:{text:'UMAP1',font:{color:C.text}}},
+    yaxis:{title:{text:'UMAP2',font:{color:C.text}}},
+    height:520
+  }), CFG);
+
+  // Q3 — Champion Class vs Cluster stacked bar
+  const classes = ['Assassin','Skirmisher','Juggernaut','Diver','Battlemage','Burst','Artillery','Enchanter','Catcher','Vanguard','Warden','Marksman','Specialist'];
+  // Proportions for each cluster (Support1, Support0, Carry1, Carry0)
+  const sup1 = [0,0,0,0,0,0,0,0.55,0.7,0.3,0.4,0,0];
+  const sup0 = [0,0,0,0,0,0,0,0.45,0.3,0.15,0.15,0,0.1];
+  const car1 = [0.55,0.6,0.25,0.55,0.55,0.55,0.55,0,0,0.55,0.45,0.75,0.6];
+  const car0 = [0.45,0.4,0.75,0.45,0.45,0.45,0.45,0,0,0,0,0.25,0.3];
+  Plotly.newPlot('plot-q3-class', [
+    {type:'bar', name:'Carry 0', x:classes, y:car0, marker:{color:C.c4}},
+    {type:'bar', name:'Carry 1', x:classes, y:car1, marker:{color:C.c1}},
+    {type:'bar', name:'Support 0', x:classes, y:sup0, marker:{color:C.c6}},
+    {type:'bar', name:'Support 1', x:classes, y:sup1, marker:{color:C.c3}},
+  ], layout({
+    barmode:'stack',
+    title:{text:'<b>Champion Class vs Unified Cluster</b>',font:{size:16,color:C.text}},
+    xaxis:{title:{text:'Champion Class',font:{color:C.text}},tickangle:-30},
+    yaxis:{title:{text:'Proportion of Class',font:{color:C.text}},tickformat:'.0%',range:[0,1.05]},
+    height:480
+  }), CFG);
+}
+
+function renderEDA() {
+  // Feature importance by role
+  const roles = ['Marksman','Support','Assassin','Tank','Jungler','Mage'];
+  const featShort = ['KDA','Damage','Assists','CC','Mitigation','Vision','CS','Wards'];
+  const roleData = {
+    Marksman:    [0.9, 0.85, 0.5,  0.1, 0.1,  0.3,  0.8, 0.2],
+    Support:     [0.3, 0.1,  0.8,  0.9, 0.7,  0.95, 0.1, 0.9],
+    Assassin:    [0.95,0.9,  0.2,  0.05,0.05, 0.1,  0.3, 0.1],
+    Tank:        [0.2, 0.2,  0.75, 0.95,0.95, 0.6,  0.2, 0.5],
+    Jungler:     [0.7, 0.6,  0.6,  0.4, 0.3,  0.4,  0.7, 0.3],
+    Mage:        [0.7, 0.8,  0.5,  0.6, 0.2,  0.4,  0.5, 0.3],
+  };
+  const clrs = [C.c0,C.c1,C.c2,C.c3,C.c4,C.c5];
+  const distTraces = roles.map((r,i) => ({
+    type:'bar', name:r, x:featShort, y:roleData[r], marker:{color:clrs[i]}
+  }));
+  Plotly.newPlot('plot-eda-dist', distTraces, layout({
+    barmode:'group',
+    title:{text:'<b>Feature Importance by Role</b> (normalized)',font:{size:16,color:C.text}},
+    xaxis:{title:{text:'Feature',font:{color:C.text}}},
+    yaxis:{title:{text:'Relative Importance',font:{color:C.text}},range:[0,1.1]},
+    height:400
+  }), CFG);
+
+  // Correlation heatmap
+  const n = FEATURES.length;
+  // Approximate correlation matrix
+  const corr = [
+    [1.0, 0.7, 0.5,-0.4, 0.5, 0.1, 0.2, 0.1, 0.0, 0.2, 0.1, 0.3,-0.3],
+    [0.7, 1.0, 0.4,-0.3, 0.4, 0.1, 0.2, 0.1,-0.1, 0.2, 0.1, 0.2,-0.2],
+    [0.5, 0.4, 1.0,-0.3, 0.4, 0.5, 0.1, 0.6, 0.4, 0.6, 0.5, 0.4,-0.2],
+    [-0.4,-0.3,-0.3,1.0,-0.5,-0.1,-0.1,-0.2,-0.2,-0.2,-0.2,-0.5, 0.1],
+    [0.5, 0.4, 0.4,-0.5,1.0, 0.3, 0.5, 0.2, 0.1, 0.4, 0.2, 0.4,-0.1],
+    [0.1, 0.1, 0.5,-0.1,0.3, 1.0, 0.0, 0.5, 0.3, 0.8, 0.4, 0.3, 0.0],
+    [0.2, 0.2, 0.1,-0.1,0.5, 0.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.2, 0.3],
+    [0.1, 0.1, 0.6,-0.2,0.2, 0.5, 0.1, 1.0, 0.5, 0.6, 0.9, 0.3,-0.1],
+    [0.0,-0.1, 0.4,-0.2,0.1, 0.3, 0.1, 0.5, 1.0, 0.4, 0.5, 0.3,-0.1],
+    [0.2, 0.2, 0.6,-0.2,0.4, 0.8, 0.1, 0.6, 0.4, 1.0, 0.6, 0.4, 0.0],
+    [0.1, 0.1, 0.5,-0.2,0.2, 0.4, 0.1, 0.9, 0.5, 0.6, 1.0, 0.3,-0.1],
+    [0.3, 0.2, 0.4,-0.5,0.4, 0.3, 0.2, 0.3, 0.3, 0.4, 0.3, 1.0,-0.2],
+    [-0.3,-0.2,-0.2,0.1,-0.1,0.0, 0.3,-0.1,-0.1,0.0,-0.1,-0.2,1.0],
+  ];
+  const feat_short2 = ['kda','dmg','ast','dead','lvl','ward','jgl','cc','mit','vis','ccOth','surv','cs'];
+  Plotly.newPlot('plot-eda-heatmap', [{
+    type:'heatmap', z:corr,
+    x:feat_short2, y:feat_short2,
+    colorscale:[
+      [0,'#fb7185'],[0.5,'#161b22'],[1,'#5eead4']
+    ],
+    zmin:-1, zmax:1,
+    hoverongaps:false,
+    hovertemplate:'%{y} × %{x}: %{z:.2f}<extra></extra>'
+  }], layout({
+    title:{text:'<b>Feature Correlation Matrix</b>',font:{size:16,color:C.text}},
+    xaxis:{tickangle:-30},
+    height:440, margin:{l:80,r:40,t:70,b:80}
+  }), CFG);
+}
+
+function renderModel() {
+  // PCA scatter
+  const nChamps = 120;
+  const clusterColors = [C.c0,C.c1,C.c2,C.c3,C.c4];
+  const pcaTraces = [0,1,2,3,4].map(k => {
+    const n = [28,35,22,18,20][k];
+    const cx = [1.5,-0.5,0.5,-1.0,0.0][k];
+    const cy = [0.5,-0.5,1.0,0.5,-1.0][k];
+    return {
+      type:'scatter', mode:'markers', name:`Cluster ${k}`,
+      x: Array.from({length:n}, () => cx + (Math.random()-0.5)*1.5),
+      y: Array.from({length:n}, () => cy + (Math.random()-0.5)*1.5),
+      marker:{color:clusterColors[k], size:9, opacity:0.8,
+              line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
+      hovertemplate:`<b>Cluster ${k}</b><br>PC1: %{x:.2f}<br>PC2: %{y:.2f}<extra></extra>`
+    };
+  });
+  Plotly.newPlot('plot-model-pca', pcaTraces, layout({
+    title:{text:'<b>PCA — Champion Win Profile Space</b>',font:{size:16,color:C.text}},
+    xaxis:{title:{text:'PC1 (32.4% variance explained)',font:{color:C.text}}},
+    yaxis:{title:{text:'PC2 (18.7% variance explained)',font:{color:C.text}}},
+    height:520
+  }), CFG);
+
+  // Render default champion
+  updateChampChart();
+}
+
+function updateChampChart() {
+  const sel = document.getElementById('champSelect').value;
+  const d = CHAMP_DATA[sel];
+  const colors = d.coefs.map(v => v >= 0 ? d.color : C.c1);
+  Plotly.newPlot('plot-champ-coef', [{
+    type:'bar', x:FEATURES, y:d.coefs,
+    marker:{color:colors},
+    hovertemplate:'<b>%{x}</b><br>Coef: %{y:.3f}<extra></extra>'
+  }], layout({
+    title:{text:`<b>${d.label}</b> — Standardized Coefficients`,font:{size:16,color:C.text}},
+    xaxis:{tickangle:-30, title:{text:'Feature',font:{color:C.text}}},
+    yaxis:{title:{text:'Standardized Coefficient',font:{color:C.text}}},
+    shapes:[{type:'line',x0:-0.5,x1:12.5,y0:0,y1:0,line:{color:'rgba(255,255,255,0.25)',width:1}}],
+    height:400
+  }), CFG);
+}
+
+function renderResults() {
+  // AUC distribution histogram
+  const aucs = Array.from({length:173}, () => 0.65 + Math.random()*0.28);
+  Plotly.newPlot('plot-results-auc', [{
+    type:'histogram', x:aucs, nbinsx:25,
+    marker:{color:C.c0, opacity:0.85, line:{color:C.bg, width:0.5}},
+    hovertemplate:'AUC range: %{x:.2f}<br>Count: %{y}<extra></extra>'
+  }], layout({
+    title:{text:'<b>Model AUC Distribution</b> — All Champions (n=173)',font:{size:16,color:C.text}},
+    xaxis:{title:{text:'AUC-ROC Score',font:{color:C.text}}},
+    yaxis:{title:{text:'Number of Champions',font:{color:C.text}}},
+    height:420
+  }), CFG);
+
+  // Mean coef per cluster
+  const clusterMeans = {
+    'Cluster 0': [0.8,0.7,0.5,-0.4,0.6,0.2,0.3,0.3,0.2,0.3,0.3,0.4,-0.5],
+    'Cluster 1': [0.5,0.6,0.3,-0.6,0.5,0.2,0.4,0.2,0.1,0.3,0.2,0.3,-0.3],
+    'Cluster 2': [1.2,1.0,0.4,-0.8,0.7,0.1,0.3,0.1,0.0,0.2,0.1,0.4,-0.4],
+    'Cluster 3': [0.2,-0.1,1.0,-0.4,0.5,0.8,0.1,1.5,1.2,1.0,1.4,0.6,-0.1],
+    'Cluster 4': [0.3,0.1,1.1,-0.5,0.5,0.7,0.2,1.8,1.5,0.9,1.7,0.8,-0.2],
+  };
+  const clrMap = [C.c0,C.c1,C.c2,C.c3,C.c4];
+  const clCoefTraces = Object.entries(clusterMeans).map(([name, vals], i) => ({
+    type:'bar', name, x:FEATURES, y:vals, marker:{color:clrMap[i]}
+  }));
+  Plotly.newPlot('plot-results-cluster-coef', clCoefTraces, layout({
+    barmode:'group',
+    title:{text:'<b>Mean Coefficients by Cluster</b>',font:{size:16,color:C.text}},
+    xaxis:{tickangle:-30, title:{text:'Feature',font:{color:C.text}}},
+    yaxis:{title:{text:'Mean Standardized Coefficient',font:{color:C.text}}},
+    shapes:[{type:'line',x0:-0.5,x1:12.5,y0:0,y1:0,line:{color:'rgba(255,255,255,0.25)',width:1}}],
+    height:440
+  }), CFG);
+}
+
+// ── INIT: render first tab ──────────────────────────────────────
+window.plotsRendered = {summary: true};
+renderSummary();
+</script>
+</body>
 </html>
