@@ -448,10 +448,11 @@
       <select id="champView" onchange="updateChampChart()">
         <option value="coef">Model Coefficients</option>
         <option value="zscore">Z-Scores vs. Global Mean</option>
+        <option value="zscore_role">Z-Scores vs. Role Mean</option>
       </select>
     </div>
     <div id="plot-champ-coef" class="plot-wrap" style="height:440px;"></div>
-    <p class="plot-caption">Standardized logistic regression coefficients (or z-scores vs. global Challenger mean) for the selected champion. Teal = positive effect on win probability; red = negative. AUC and game count shown in title.</p>
+    <p class="plot-caption">Standardized logistic regression coefficients, z-scores vs. the global Challenger mean, or z-scores vs. the mean of the champion's own role. Teal = positive; red = negative. AUC and game count shown in title.</p>
 
     <div class="divider"></div>
 
@@ -498,7 +499,7 @@
     </div>
 
     <div id="plot-model-pca" class="plot-wrap" style="height:580px;"></div>
-    <p class="plot-caption">Global MDS layout of (champion, role) win-profile coefficient vectors. Color indicates the unsupervised cluster each entity belongs to. Hover over each point to see the champion name. Axes are unitless layout coordinates and only the relative positions of points carry information.</p>
+    <p class="plot-caption">Global MDS layout of (champion, role) win-profile coefficient vectors, colored by Riot's official role. Hover over each point to see the champion name. Axes are unitless layout coordinates; only the relative positions of points carry information. The visible separation by color is the consequence of role being the single largest source of variation in the coefficient space, which is the same observation that motivated the per-role clustering described in the methodology.</p>
 
     <div class="divider"></div>
 
@@ -674,7 +675,7 @@
       <div class="q-card">
         <div class="q-num">Answer 02</div>
         <h3>Clustering by Win Profile</h3>
-        <p>Yes. Clustering the 172 by 16 coefficient matrix yields stable groups that align with broad archetypes such as marksmen, mages, divers, engage supports, utility supports, and melee fighters, without ever using Riot's role labels as input. The Champion Win Profiles heatmap shows that champions with adjacent profiles share similar mixes of damage, mitigation, and crowd-control features, which confirms that win conditions cluster meaningfully on their own.</p>
+        <p>Yes. Clustering the 172 by 16 coefficient matrix yields stable groups that align with broad archetypes such as marksmen, mages, divers, engage supports, enchanters, and melee fighters, without ever using Riot's role labels as input. The Champion Win Profiles heatmap shows that champions with adjacent profiles share similar mixes of damage, mitigation, and crowd-control features, which confirms that win conditions cluster meaningfully on their own.</p>
       </div>
       <div class="q-card">
         <div class="q-num">Answer 03</div>
@@ -726,16 +727,6 @@ const C = {
   c0:'#5eead4', c1:'#fb7185', c2:'#fbbf24', c3:'#a78bfa', c4:'#60a5fa',
   c5:'#f472b6', c6:'#34d399', c7:'#fb923c'
 };
-const CLUSTER_COLORS = [C.c0, C.c4, C.c2, C.c3, C.c1, C.c5];
-const CLUSTER_NAMES = [
-  'Support Engagers',
-  'Melee Fighters',
-  'Marksmen / ADC',
-  'Utility Supports',
-  'Divers / Skirmishers',
-  'Mages'
-];
-
 const BASE = {
   paper_bgcolor: '#0d1117', plot_bgcolor: '#161b22',
   font: { family:"'Inter',sans-serif", color: '#e6edf3', size:12 },
@@ -792,30 +783,33 @@ function renderEDA() {
 
 // ── MODEL ─────────────────────────────────────────────────────
 function renderModel() {
-  const byCluster = {};
-  PCA_DATA.forEach(r => {
-    if (!byCluster[r.cluster]) byCluster[r.cluster] = {x:[],y:[],text:[]};
-    byCluster[r.cluster].x.push(parseFloat(r.PC1.toFixed(4)));
-    byCluster[r.cluster].y.push(parseFloat(r.PC2.toFixed(4)));
-    byCluster[r.cluster].text.push(r.champion);
+  // Use the (champion, role) entity data, color by Riot role
+  const byRole = {};
+  GLOBAL_PCA_DATA2.forEach(r => {
+    if (!byRole[r.role]) byRole[r.role] = {x:[],y:[],text:[]};
+    byRole[r.role].x.push(parseFloat(r.PCA1.toFixed(4)));
+    byRole[r.role].y.push(parseFloat(r.PCA2.toFixed(4)));
+    byRole[r.role].text.push(r.champion);
   });
 
-  const pcaTraces = Object.keys(byCluster).sort((a,b)=>+a-+b).map(k => ({
+  const orderedRoles = ROLE_ORDER.filter(r => byRole[r]);
+  const mdsTraces = orderedRoles.map(role => ({
     type:'scatter', mode:'markers+text',
-    x: byCluster[k].x, y: byCluster[k].y,
-    text: byCluster[k].text,
+    x: byRole[role].x, y: byRole[role].y,
+    text: byRole[role].text,
     textposition:'top center',
-    textfont:{size:7, color:CLUSTER_COLORS[+k]},
-    name: CLUSTER_NAMES[+k],
-    marker:{color:CLUSTER_COLORS[+k], size:9, opacity:0.85, line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
-    hovertemplate:'<b>%{text}<\/b><extra><\/extra>'
+    textfont:{size:7, color:ROLE_COLORS[role]},
+    name: ROLE_DISPLAY[role] || role,
+    marker:{color:ROLE_COLORS[role], size:9, opacity:0.85, line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
+    hovertemplate:`<b>%{text}</b><br>Role: ${ROLE_DISPLAY[role] || role}<extra></extra>`
   }));
 
-  Plotly.newPlot('plot-model-pca', pcaTraces, L({
+  Plotly.newPlot('plot-model-pca', mdsTraces, L({
     title:{text:'<b>Global MDS: Champion Win Profiles</b>',font:{size:16}},
     xaxis:{title:{text:''}, showticklabels:false, zeroline:false},
     yaxis:{title:{text:''}, showticklabels:false, zeroline:false},
-    height:580, margin:{l:50,r:220,t:70,b:40}
+    legend:{title:{text:'Role'}},
+    height:580, margin:{l:50,r:200,t:70,b:40}
   }), CFG);
 
   Plotly.newPlot('plot-results-auc', [{
@@ -832,29 +826,87 @@ function renderModel() {
   updateChampChart();
 }
 
+// Champion → role lookup (from the (champion, role) entity data)
+const CHAMP_ROLE = {};
+(typeof GLOBAL_PCA_DATA2 !== 'undefined' ? GLOBAL_PCA_DATA2 : []).forEach(r => {
+  if (!CHAMP_ROLE[r.champion]) CHAMP_ROLE[r.champion] = r.role;
+});
+// Display name: API value UTILITY → SUPPORT
+const ROLE_DISPLAY = {TOP:'TOP', JUNGLE:'JUNGLE', MIDDLE:'MIDDLE', BOTTOM:'BOTTOM', UTILITY:'SUPPORT'};
+// Role mean z-scores (mean over champs in same role, of each feature's global z-score)
+const ROLE_Z_MEANS = (function () {
+  const sums = {}, counts = {};
+  Object.entries(ALL_ZSCORES || {}).forEach(([champ, zs]) => {
+    const role = CHAMP_ROLE[champ];
+    if (!role) return;
+    if (!sums[role]) { sums[role] = {}; counts[role] = 0; }
+    FEATURES.forEach(f => { sums[role][f] = (sums[role][f] || 0) + (zs[f] || 0); });
+    counts[role]++;
+  });
+  const means = {};
+  Object.keys(sums).forEach(role => {
+    means[role] = {};
+    FEATURES.forEach(f => { means[role][f] = sums[role][f] / counts[role]; });
+  });
+  return means;
+})();
+
 function updateChampChart() {
   const sel = document.getElementById('champSelect').value;
   const view = document.getElementById('champView').value;
   const isCoef = view === 'coef';
-  const data = isCoef ? ALL_COEFS[sel] : ALL_ZSCORES[sel];
-  const vals = FEATURES.map(f => data ? (data[f] || 0) : 0);
+  const isRoleZ = view === 'zscore_role';
+  const role = CHAMP_ROLE[sel];
+  const roleDisplay = role ? (ROLE_DISPLAY[role] || role) : null;
+
+  let vals;
+  let yLabel;
+  let titleText;
+  if (isCoef) {
+    const data = ALL_COEFS[sel] || {};
+    vals = FEATURES.map(f => data[f] || 0);
+    yLabel = 'Standardized Coefficient';
+    titleText = `<b>${sel}</b>: Coefficient Bar Chart`;
+  } else if (isRoleZ) {
+    const zs = ALL_ZSCORES[sel] || {};
+    if (role && ROLE_Z_MEANS[role]) {
+      const means = ROLE_Z_MEANS[role];
+      vals = FEATURES.map(f => (zs[f] || 0) - (means[f] || 0));
+      yLabel = `Z-Score (σ from ${roleDisplay} role mean)`;
+      titleText = `<b>${sel}</b>: Z-Score vs. ${roleDisplay} Role Mean`;
+    } else {
+      vals = FEATURES.map(f => zs[f] || 0);
+      yLabel = 'Z-Score (σ from global mean)';
+      titleText = `<b>${sel}</b>: Role unknown — falling back to global mean`;
+    }
+  } else {
+    const zs = ALL_ZSCORES[sel] || {};
+    vals = FEATURES.map(f => zs[f] || 0);
+    yLabel = 'Z-Score (σ from global mean)';
+    titleText = `<b>${sel}</b>: Z-Score vs. Global Challenger Mean`;
+  }
+
   const colors = vals.map(v => v >= 0 ? '#5eead4' : '#fb7185');
   const auc = METRICS[sel] ? METRICS[sel].auc.toFixed(3) : 'N/A';
   const n = METRICS[sel] ? METRICS[sel].n_games.toLocaleString() : 'N/A';
-  const yLabel = isCoef ? 'Standardized Coefficient' : 'Z-Score (σ from global mean)';
-  const titleText = isCoef
-    ? `<b>${sel}<\/b>: Coefficient Bar Chart`
-    : `<b>${sel}<\/b>: Z-Score vs. Global Challenger Mean`;
+  const roleNote = roleDisplay ? ` · role=${roleDisplay}` : '';
+  const shapes = isCoef
+    ? [{type:'line', x0:-0.5, x1:15.5, y0:0, y1:0, line:{color:'rgba(255,255,255,0.2)', width:1}}]
+    : [
+        {type:'line', x0:-0.5, x1:15.5, y0:0, y1:0, line:{color:'rgba(255,255,255,0.2)', width:1}},
+        {type:'line', x0:-0.5, x1:15.5, y0:1, y1:1, line:{color:'rgba(255,255,255,0.15)', width:1, dash:'dash'}},
+        {type:'line', x0:-0.5, x1:15.5, y0:-1, y1:-1, line:{color:'rgba(255,255,255,0.15)', width:1, dash:'dash'}}
+      ];
 
   Plotly.newPlot('plot-champ-coef', [{
     type:'bar', x:FEATURES, y:vals,
     marker:{color:colors, line:{color:'rgba(255,255,255,0.08)', width:0.5}},
-    hovertemplate:`<b>%{x}<\/b><br>${yLabel.split(' ')[0]}: %{y:.3f}<extra><\/extra>`
+    hovertemplate:`<b>%{x}</b><br>${yLabel.split(' ')[0]}: %{y:.3f}<extra></extra>`
   }], L({
-    title:{text:titleText + `  <span style="font-size:11px;color:#8b949e">AUC=${auc} · n=${n} games<\/span>`,font:{size:15}},
+    title:{text:titleText + `  <span style="font-size:11px;color:#8b949e">AUC=${auc} · n=${n} games${roleNote}</span>`, font:{size:15}},
     xaxis:{tickangle:-40, title:{text:'Feature'}, tickfont:{size:9}},
     yaxis:{title:{text:yLabel}},
-    shapes:[{type:'line',x0:-0.5,x1:15.5,y0:0,y1:0,line:{color:'rgba(255,255,255,0.2)',width:1}}],
+    shapes:shapes,
     height:440
   }), CFG);
 }
@@ -957,13 +1009,13 @@ function renderPerRolePCA() {
     layout[xKey] = Object.assign({}, BASE.xaxis, axisStyle);
     layout[yKey] = Object.assign({}, BASE.yaxis, axisStyle);
   }
-  // Add subplot titles as annotations (role name only — no variance %)
+  // Add subplot titles as annotations (role name only, with UTILITY → SUPPORT)
   roles.forEach((role, idx) => {
     const xref = idx===0?'x domain':`x${idx+1} domain`;
     const yref = idx===0?'y domain':`y${idx+1} domain`;
     layout.annotations = layout.annotations || [];
     layout.annotations.push({
-      text:`<b>${role}</b>`,
+      text:`<b>${ROLE_DISPLAY[role] || role}</b>`,
       xref:xref, yref:yref, x:0.5, y:1.08,
       showarrow:false, font:{size:12, color:'#e6edf3'}, xanchor:'center'
     });
@@ -1017,13 +1069,16 @@ function renderRoleProfiles() {
   featMeans.sort((a,b) => b.v-a.v);
   const sortedFeats = featMeans.map(d => d.f);
   
-  const traces = roles.map(role => ({
-    type:'bar', name:role,
-    x:sortedFeats,
-    y:sortedFeats.map(f => ROLE_PROFILE_DATA[role][f]||0),
-    marker:{color:ROLE_COLORS[role]||'grey'},
-    hovertemplate:`<b>${role}<\/b><br>%{x}: %{y:.3f}<extra><\/extra>`
-  }));
+  const traces = roles.map(role => {
+    const label = ROLE_DISPLAY[role] || role;
+    return {
+      type:'bar', name:label,
+      x:sortedFeats,
+      y:sortedFeats.map(f => ROLE_PROFILE_DATA[role][f]||0),
+      marker:{color:ROLE_COLORS[role]||'grey'},
+      hovertemplate:`<b>${label}</b><br>%{x}: %{y:.3f}<extra></extra>`
+    };
+  });
   
   Plotly.newPlot('plot-role-profiles', traces, L({
     barmode:'group',
@@ -1065,13 +1120,13 @@ function renderWithinRole() {
     legend:{title:{text:'Cluster'}, font:{size:9}},
     grid:{rows:nRows, columns:nCols, pattern:'independent'}
   });
-  // Subtitle annotations
+  // Subtitle annotations (UTILITY → SUPPORT for display)
   roles.forEach((role, idx) => {
     const xref = idx===0?'x domain':`x${idx+1} domain`;
     const yref = idx===0?'y domain':`y${idx+1} domain`;
     layout.annotations = layout.annotations || [];
     layout.annotations.push({
-      text:`<b>${role}<\/b>`,
+      text:`<b>${ROLE_DISPLAY[role] || role}</b>`,
       xref:xref, yref:yref, x:0.5, y:1.1,
       showarrow:false, font:{size:12, color:'#e6edf3'}, xanchor:'center'
     });
