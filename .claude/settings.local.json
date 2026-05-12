@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i '487,670d' C:/Users/Laser/cs163-group18/index.html)",
+      "Bash(sed -n '480,500p' C:/Users/Laser/cs163-group18/index.html)"
+    ]
+  }
+}

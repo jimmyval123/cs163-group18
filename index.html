@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>League of Legends Win Analysis — CS 163 Group 18</title>
+<title>League of Legends Win Analysis | CS 163 Group 18</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -83,6 +83,11 @@
   .control-bar select { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 0.4rem 0.75rem; border-radius: 3px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b949e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.6rem center; padding-right: 2rem; }
   .control-bar select:focus { outline: none; border-color: var(--accent); }
   footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2.6rem; padding: 0.6rem 0.7rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; align-items: flex-start; align-content: flex-start; }
+  .chip-list .chip-empty { color: var(--muted); font-size: 0.82rem; padding: 0.2rem 0.1rem; font-style: italic; }
+  .chip { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--surface3); border: 1px solid var(--border2); border-radius: 16px; padding: 0.25rem 0.35rem 0.25rem 0.8rem; font-size: 0.82rem; color: var(--text); font-family: 'Inter', sans-serif; }
+  .chip button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0 0.35rem; border-radius: 50%; transition: color 0.15s, background 0.15s; }
+  .chip button:hover { color: var(--accent2); background: rgba(251,113,133,0.12); }
 </style>
 </head>
 <body>
@@ -91,28 +96,26 @@
     <div class="logo">LoL Win Analysis</div>
     <nav>
       <ul class="tab-nav">
-        <li><button class="active" onclick="switchTab('summary', this)">Summary &amp; Questions</button></li>
-        <li><button onclick="switchTab('eda', this)">EDA</button></li>
-        <li><button onclick="switchTab('model', this)">Model</button></li>
-        <li><button onclick="switchTab('analysis', this)">Analysis &amp; Visualization</button></li>
-        <li><button onclick="switchTab('results', this)">Results</button></li>
+        <li><button class="active" onclick="switchTab('objective', this)">Project Objective</button></li>
+        <li><button onclick="switchTab('methods', this)">Analytical Methods</button></li>
+        <li><button onclick="switchTab('findings', this)">Major Findings</button></li>
       </ul>
     </nav>
   </div>
 </header>
 <main>
 
-  <!-- ════ TAB: SUMMARY & QUESTIONS ════ -->
-  <section class="tab-panel active" id="tab-summary">
+  <!-- ════ TAB: PROJECT OBJECTIVE ════ -->
+  <section class="tab-panel active" id="tab-objective">
     <div class="hero">
       <div class="hero-tag">CS 163 · Group 18 · Spring 2025</div>
       <h1>What Makes a Champion Win?</h1>
-      <p>A data-driven analysis of League of Legends Challenger-tier performance statistics, win probability modeling, and champion clustering across 635K+ matches.</p>
+      <p>A data-driven analysis of League of Legends Challenger-tier performance statistics and per-champion win probability across 635K+ matches.</p>
       <div class="meta-pills">
         <span class="pill">Riot Games API</span>
         <span class="pill">635K+ Matches</span>
         <span class="pill">Logistic Regression</span>
-        <span class="pill">K-Means · PCA</span>
+        <span class="pill">Agglomerative · MDS</span>
         <span class="pill">Python · Plotly</span>
       </div>
     </div>
@@ -120,7 +123,6 @@
     <div class="stat-grid">
       <div class="stat-box"><span class="value">172</span><span class="label">Champions Modeled</span></div>
       <div class="stat-box"><span class="value">16</span><span class="label">Features Analyzed</span></div>
-      <div class="stat-box"><span class="value">6</span><span class="label">Cluster Groups</span></div>
       <div class="stat-box"><span class="value">~0.92</span><span class="label">Avg AUC Score</span></div>
       <div class="stat-box"><span class="value">635K+</span><span class="label">Total Games</span></div>
     </div>
@@ -134,15 +136,12 @@
     <div class="two-col">
       <div class="text-block">
         <h3>Motivation</h3>
-        <p>League of Legends is one of the world's most-played games, yet winning remains poorly understood at a statistical level. Conventional wisdom says "get kills to win" — our analysis of 635K+ Challenger matches shows this is far too simplistic. Success is champion-specific, not universally defined.</p>
+        <p>League of Legends is one of the world's most-played games, yet winning remains poorly understood at a statistical level. Conventional wisdom says "get kills to win." Our analysis of 635K+ Challenger matches shows this view is far too simplistic. What predicts victory varies considerably by champion, and is not universally defined.</p>
       </div>
       <div class="text-block">
         <h3>Approach</h3>
-        <p>We built individual logistic regression models for each of 172 champions using 16 standardized performance features. Coefficient vectors were then clustered via K-Means (k=6) and visualized with PCA to reveal structural groupings across the champion pool.</p>
+        <p>We built individual logistic regression models for each of 172 champions using 16 standardized performance features. Coefficient vectors were then clustered and visualized with MDS to reveal structural groupings across the champion pool.</p>
       </div>
-    </div>
-    <div class="highlight-box">
-      <p><strong>Key Finding:</strong> Champions like Jinx (Marksman) win through KDA and objective damage, while supports like Braum win through crowd control and mitigation — not kills. Our per-champion models capture these role-specific win conditions with high accuracy (AUC ≈ 0.92 on average).</p>
     </div>
 
     <div class="divider"></div>
@@ -160,7 +159,7 @@
       <div class="q-card">
         <div class="q-num">Question 02</div>
         <h3>Clustering by Win Profile</h3>
-        <p>Can champions be meaningfully grouped based on similarities in the features that predict their victories, independent of official role assignments? We use K-Means on coefficient vectors to find natural groupings.</p>
+        <p>Can champions be meaningfully grouped based on similarities in the features that predict their victories, independent of official role assignments? We use Agglomerative Clustering with Ward linkage on coefficient vectors to find natural groupings.</p>
       </div>
       <div class="q-card">
         <div class="q-num">Question 03</div>
@@ -168,10 +167,9 @@
         <p>Do data-driven clusters correspond to Riot's official classifications? Partial alignment would validate our approach; divergence reveals novel insights about non-standard champion playstyles.</p>
       </div>
     </div>
-  </section>
 
-  <!-- ════ TAB: EDA ════ -->
-  <section class="tab-panel" id="tab-eda">
+    <div class="divider"></div>
+
     <div class="section-head">
       <span class="section-number">// EXPLORATORY DATA ANALYSIS</span>
       <h2>Data Overview</h2>
@@ -194,7 +192,7 @@
         <thead><tr><th>Feature</th><th>Category</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>kda</td><td>Combat</td><td>Kill-Death-Assist ratio</td></tr>
-          <tr><td>assistRatio</td><td>Combat</td><td>Assists / (kills + assists + 1) — team-play index</td></tr>
+          <tr><td>assistRatio</td><td>Combat</td><td>Assists / (kills + assists + 1); team-play index</td></tr>
           <tr><td>totalTimeSpentDead</td><td>Combat</td><td>Cumulative seconds spent dead</td></tr>
           <tr><td>physicalDamageToChampions</td><td>Damage</td><td>Raw physical damage to enemy champions</td></tr>
           <tr><td>magicDamageToChampions</td><td>Damage</td><td>Raw magic damage to enemy champions</td></tr>
@@ -215,38 +213,61 @@
     </div>
 
     <div id="plot-eda-heatmap" class="plot-wrap" style="height:540px;"></div>
-    <p class="plot-caption">Feature correlation matrix computed from all 635K+ player-game records. Notable: physicalDamageRatio and magicDamageToChampions are strongly anti-correlated (−0.67), clearly separating ADCs from mages. damageSelfMitigated and mitigationRatio cluster together (0.70) as expected.</p>
-
-    <div id="plot-eda-winrate" class="plot-wrap" style="height:420px;"></div>
-    <p class="plot-caption">Distribution of model AUC scores across all 172 champions. Most champions have AUC between 0.88 and 0.96, indicating the 16-feature logistic regression is highly predictive of win outcome in Challenger-tier play.</p>
+    <p class="plot-caption">Feature correlation matrix computed from all 635K+ player-game records. Two patterns stand out. physicalDamageRatio and magicDamageToChampions are strongly anti-correlated (−0.67), clearly separating ADCs from mages. damageSelfMitigated and mitigationRatio move together (0.70), as expected from how they are defined.</p>
   </section>
 
-  <!-- ════ TAB: MODEL ════ -->
-  <section class="tab-panel" id="tab-model">
+  <!-- ════ TAB: ANALYTICAL METHODS ════ -->
+  <section class="tab-panel" id="tab-methods">
     <div class="section-head">
       <span class="section-number">// ANALYTICAL METHODS</span>
-      <h2>Modeling Approach</h2>
+      <h2>Major Techniques</h2>
+    </div>
+    <p style="color:var(--muted); font-size:0.92rem; margin-bottom:1.5rem;">Three techniques work together in the pipeline. The first is a standardized per-champion classifier that learns what predicts a win for each champion individually. The second is an unsupervised grouping step that finds champions with similar coefficient patterns. The third is a 2D projection that makes the resulting structure visible. Each step is described in the sections below.</p>
+
+    <div class="section-head" style="margin-top:1rem;">
+      <span class="section-number">// 01</span>
+      <h2>Per-(Champion, Role) Logistic Regression</h2>
     </div>
     <div class="two-col">
       <div class="card">
-        <h3>Per-Champion Logistic Regression</h3>
-        <p>A separate logistic regression (L2 penalty, C=1.0) was trained for each of 172 champions with ≥50 games. Features were z-score standardized before fitting, making coefficients comparable across features within a champion. The binary target is win (1) vs. loss (0), evaluated with AUC-ROC.</p>
+        <h3>Why a Model per (Champion, Role)</h3>
+        <p>A single global model would average away the very thing we want to study, which is that "what wins" depends on the champion you are playing and the role they are playing in. The unit of modeling is therefore the (champion, role) entity. Champions like Dr. Mundo, who are flexed between Top and Jungle in Challenger, are split into separate entities such as DrMundo (TOP) and DrMundo (JGL) when both roles cross the minimum-games threshold. This keeps the coefficients tied to a single playstyle rather than a blend of two.</p>
       </div>
       <div class="card">
-        <h3>Clustering &amp; PCA</h3>
-        <p>Coefficient vectors (172 × 16) were assembled into a matrix and clustered with K-Means (k=6). PCA was applied for 2D visualization. PC1 explains 27.8% of variance, PC2 explains 22.5% — 50.3% total, capturing the dominant structure in champion win profiles.</p>
+        <h3>Specification</h3>
+        <p>One Logistic Regression per (champion, role) entity, fit with Elastic Net regularization (l1_ratio=0.3, mostly Ridge with a light L1 contribution to nudge weak coefficients toward zero). A win/loss binary target is used. Entities below the minimum sample gate of MIN_SAMPLES=750 games are dropped to avoid unstable coefficients from sparse data.</p>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Preprocessing and Standardization</h3>
+        <p>Inputs run through a StandardScaler fit per (champion, role) before the regression sees them, producing z-score normalized features. This makes coefficients comparable across features within an entity: a coefficient of +0.5 on KDA and +0.5 on nonCsGold both mean "one standard deviation in that feature lifts win probability by the same amount," regardless of the underlying units.</p>
+      </div>
+      <div class="card">
+        <h3>Feature Engineering and Curation</h3>
+        <p>Six derived features were built on top of the raw Riot API stats: <code>kda</code>, <code>assistRatio</code>, <code>damageEfficiency</code>, <code>mitigationRatio</code>, <code>physicalDamageRatio</code>, and <code>nonCsGold</code>. The starting candidate set was 27 features. 11 of those were dropped through manual curation after the Pearson correlation matrix identified them as algebraically redundant with surviving features, leaving the 16 features used in the model.</p>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Why Logistic over a Black Box</h3>
+        <p>Tree ensembles or neural nets might squeeze out marginal AUC gains, but the central question of this project is what makes a champion win, and not only whether we can predict it. Logistic regression provides a single signed and scaled number per feature per entity, which is exactly the artifact that the clustering and visualization steps depend on.</p>
+      </div>
+      <div class="card">
+        <h3>Model Evaluation</h3>
+        <p>Each entity's model is evaluated with ROC AUC on held-out games. AUC is used because it is threshold-free and stays interpretable across champions with different win-rate base rates, which makes scores directly comparable from one (champion, role) entity to another.</p>
       </div>
     </div>
 
-    <div id="plot-model-pca" class="plot-wrap" style="height:580px;"></div>
-    <p class="plot-caption">Global PCA of champion win-profile coefficient vectors (172 champions × 16 features). Color indicates K-Means cluster assignment. Hover over each point to see the champion name and cluster. PC1 (27.8%) roughly separates damage-dealers from utility champions; PC2 (22.5%) captures within-role variation.</p>
-
-    <div class="divider"></div>
-
-    <div class="section-head">
-      <span class="section-number">// CHAMPION EXPLORER</span>
-      <h2>Explore Any Champion's Win Profile</h2>
+    <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:600; color:var(--accent3); margin:2rem 0 1rem; letter-spacing:0.03em;">Model AUC Across the Roster</h3>
+    <div class="stat-grid">
+      <div class="stat-box"><span class="value">~0.92</span><span class="label">Mean AUC</span></div>
+      <div class="stat-box"><span class="value">0.86 – 0.96</span><span class="label">AUC Range</span></div>
     </div>
+    <div id="plot-results-auc" class="plot-wrap" style="height:420px;"></div>
+    <p class="plot-caption">AUC distribution across all 172 champion models. The tight range (0.86 to 0.96) with a mean near 0.92 indicates consistent predictive power. Champions with lower AUC tend to have fewer games or more chaotic playstyles, such as assassins with high game-to-game variance.</p>
+
+    <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:600; color:var(--accent3); margin:2rem 0 1rem; letter-spacing:0.03em;">Explore Any Champion's Win Profile</h3>
     <div class="control-bar">
       <label>Champion:</label>
       <select id="champSelect" onchange="updateChampChart()">
@@ -431,126 +452,236 @@
     </div>
     <div id="plot-champ-coef" class="plot-wrap" style="height:440px;"></div>
     <p class="plot-caption">Standardized logistic regression coefficients (or z-scores vs. global Challenger mean) for the selected champion. Teal = positive effect on win probability; red = negative. AUC and game count shown in title.</p>
-  </section>
-
-  <!-- ════ TAB: ANALYSIS & VISUALIZATION ════ -->
-  <section class="tab-panel" id="tab-analysis">
-    <div class="section-head">
-      <span class="section-number">// ANALYSIS &amp; VISUALIZATION</span>
-      <h2>In-Depth Analysis</h2>
-    </div>
-
-    <!-- 1. GLOBAL PCA -->
-    <div class="section-head" style="margin-top:1rem;">
-      <span class="section-number">// 01</span>
-      <h2>Global PCA</h2>
-    </div>
-    <div class="highlight-box">
-      <p>Linear projection of the full 172-champion coefficient matrix to 2D. Role differences dominate PC1/PC2 — supports cluster bottom-left, junglers top-right. Use the per-role PCA below to see within-role variation.</p>
-    </div>
-    <div id="plot-global-pca" class="plot-wrap" style="height:700px;"></div>
-    <p class="plot-caption">Global PCA — all 172 champions colored by role-cluster label. PC1 and PC2 together explain the largest axes of variation across all win-condition vectors.</p>
 
     <div class="divider"></div>
 
-    <!-- 2. PER-ROLE PCA -->
     <div class="section-head">
       <span class="section-number">// 02</span>
-      <h2>Per-Role PCA</h2>
+      <h2>Agglomerative Clustering on Coefficient Vectors</h2>
     </div>
-    <div class="highlight-box">
-      <p>A separate PCA fitted on each role's champion subset, so cross-role variance doesn't dominate the embedding. Each panel reveals the within-role axes of variation — e.g. the ADC panel separates poke carries from burst/dive ADCs.</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>The Object Being Clustered</h3>
+        <p>Each (champion, role) entity is represented by a 16-dimensional vector of standardized logistic regression coefficients describing what predicts a win for that entity. Stacking the entities within a role produces a matrix in which rows that look alike correspond to champions whose victories are driven by similar feature mixes inside that role.</p>
+      </div>
+      <div class="card">
+        <h3>Algorithm Choice</h3>
+        <p>Clustering is done with Agglomerative Clustering using Ward linkage, fit separately per role on the coefficient vectors. Ward linkage minimizes the within-cluster variance increase at each merge step, which produces tight clusters whose centroids stay interpretable as average win profiles. The same Ward-linkage logic is also used elsewhere in the pipeline to order the rows and columns of the feature correlation matrix.</p>
+      </div>
     </div>
-    <div id="plot-per-role-pca" class="plot-wrap" style="height:900px;"></div>
-    <p class="plot-caption">Per-role PCA (one panel per role). Points colored by cluster assignment; champion names labeled. Variance explained shown in each subplot title.</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>Choosing k</h3>
+        <p>The number of clusters per role is selected automatically by maximizing the silhouette score over k ∈ [2, 6]. Silhouette balances within-cluster cohesion against between-cluster separation, which tends to land on a number of clusters that is neither one mega-group nor a long tail of singletons. A <code>CHOSEN_K_PER_ROLE</code> override hook is exposed in the pipeline: set <code>None</code> to use the automatic silhouette pick, or pass an integer to fix k for a given role when the automatic choice is not the right granularity for the question being asked.</p>
+      </div>
+      <div class="card">
+        <h3>From Global Clustering to Per-Role Clustering</h3>
+        <p>The first version of this pipeline clustered every champion together in a single global run. The clusters that came out mostly just recovered the five roles, because some features cleanly divide roles on their own. wardsPlaced separates supports from everyone else, and the jungle-camp signal embedded in nonCsGold and damageEfficiency separates junglers from laners. With those features dominating the distance metric, the algorithm had little incentive to find anything subtler than "support vs. jungle vs. laner." That result itself was informative: it suggested that the largest axis of variance between champions is the role they are built to fulfill, and that within a role each champion is more like a chassis tuned to do that job in a particular way. Acting on that, we switched to fitting Agglomerative Ward on each role's subset separately, so per-role clusters can capture how champions in the same role accomplish their shared job differently.</p>
+      </div>
+    </div>
 
     <div class="divider"></div>
 
-    <!-- 3. CHAMPION WIN PROFILES -->
     <div class="section-head">
       <span class="section-number">// 03</span>
+      <h2>Multidimensional Scaling for Visualization</h2>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Why MDS</h3>
+        <p>The clustering happens in 16-dimensional coefficient space, which cannot be drawn directly. MDS places each (champion, role) entity in a 2D layout that tries to preserve the pairwise distances between entities from the original high-dimensional space. The result is a scatter plot where champions that look alike in their win profiles end up near each other, and champions with different win conditions are pushed apart. MDS is used here purely as a visualization layout, not as a modeling step.</p>
+      </div>
+      <div class="card">
+        <h3>Global and Per-Role MDS</h3>
+        <p>Two MDS layouts are produced. A global MDS positions every entity in the same 2D space so the entire roster can be seen at once. A second MDS is also fit separately on each role's subset, because role-level differences would otherwise dominate the global layout and crowd within-role variation into tight blobs. The per-role layouts give each role enough room to show its own sub-archetypes clearly.</p>
+      </div>
+    </div>
+
+    <div id="plot-model-pca" class="plot-wrap" style="height:580px;"></div>
+    <p class="plot-caption">Global MDS layout of (champion, role) win-profile coefficient vectors. Color indicates the unsupervised cluster each entity belongs to. Hover over each point to see the champion name. Axes are unitless layout coordinates and only the relative positions of points carry information.</p>
+
+    <div class="divider"></div>
+
+    <div class="section-head">
+      <span class="section-number">// 04</span>
+      <h2>Statistical and Aggregation Analyses</h2>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Correlation Matrix and Ward Ordering</h3>
+        <p>A Pearson correlation matrix is computed on the raw features across all 635K+ player-game records, which is what drives the manual curation that drops the 11 redundant features. The rows and columns of the displayed correlation heatmap are then reordered using Agglomerative Clustering with Ward linkage, so that strongly correlated features land next to each other and the block structure becomes visually obvious.</p>
+      </div>
+      <div class="card">
+        <h3>Group Means and Centroids</h3>
+        <p>Several aggregation levels are computed on top of the per-entity coefficients. Role centroids average the coefficient vectors of all (champion, role) entities sharing a role. Role-cluster centroids do the same within each per-role Agglomerative cluster, producing a mean win profile for each sub-archetype.</p>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Z-Scores for Surprise Analysis</h3>
+        <p>Z-scores are computed both within group and within population, depending on the question. Within-population z-scores compare a champion's average stats to the global Challenger mean and surface the features where that champion is unusual in the dataset. Within-group z-scores compare a champion against its own role or its own per-role cluster, which is how feature leaders inside each subset are identified.</p>
+      </div>
+      <div class="card">
+        <h3>Variance-Based Feature Ranking</h3>
+        <p>Features are ranked by three variance signals depending on what is being shown: within-role variance to find features that vary most across a single role, inter-role variance to find features that most distinguish the five roles from each other, and within-role-cluster variance to find features where one role's sub-archetypes disagree most. The bar charts in Major Findings sort features left to right by these rankings.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Deviation-from-Baseline Scoring</h3>
+      <p>Two deviation scores are computed to make distinguishing features easy to see. The cluster-distinguishing score is the difference between a per-role cluster centroid and the parent role mean, which surfaces what each sub-archetype is doing differently from its role peers. The role-distinguishing score is the difference between a role mean and the global mean, which surfaces what each role is doing differently from the average Challenger game.</p>
+    </div>
+  </section>
+
+
+  <!-- ════ TAB: MAJOR FINDINGS ════ -->
+  <section class="tab-panel" id="tab-findings">
+    <div class="section-head">
+      <span class="section-number">// MAJOR FINDINGS</span>
+      <h2>In-Depth Analysis &amp; Results</h2>
+    </div>
+
+    <!-- 1. CHAMPION WIN PROFILES -->
+    <div class="section-head">
+      <span class="section-number">// 01</span>
       <h2>Champion Win Profiles</h2>
     </div>
     <div class="highlight-box">
-      <p>Heatmap of standardized logistic regression coefficients for all 172 champions × 16 features. Red = this stat drives wins; blue = winning correlates with <em>low</em> values. Champions are clustered by Ward-linkage agglomerative clustering so similar profiles appear adjacent.</p>
+      <p>Heatmap of standardized logistic regression coefficients for all 172 champions across 16 features. Red indicates that a higher value drives wins, while blue indicates that winning correlates with a lower value. Champions are grouped by Ward-linkage agglomerative clustering so that similar profiles appear adjacent.</p>
     </div>
     <div id="plot-champ-heatmap" class="plot-wrap" style="height:2800px;overflow:hidden;"></div>
-    <p class="plot-caption">Champion Win Profiles heatmap. Features ordered by average absolute coefficient (most discriminating left). Horizontal lines mark cluster boundaries.</p>
+    <p class="plot-caption">Champion Win Profiles heatmap. Features are ordered by average absolute coefficient, with the most discriminating on the left. Horizontal lines mark group boundaries.</p>
 
     <div class="divider"></div>
 
-    <!-- 4. ROLE WIN PROFILES -->
+    <!-- 2. PER-ROLE MDS -->
     <div class="section-head">
-      <span class="section-number">// 04</span>
+      <span class="section-number">// 02</span>
+      <h2>Per-Role MDS</h2>
+    </div>
+    <div class="highlight-box">
+      <p>A separate MDS layout fit on each role's champion subset, so that cross-role differences do not dominate the visualization. Each panel shows the within-role structure that gets crowded out in the global view. For example, the ADC panel separates poke carries from burst and dive ADCs.</p>
+    </div>
+    <div id="plot-per-role-pca" class="plot-wrap" style="height:900px;"></div>
+    <p class="plot-caption">Per-role MDS, with one panel per role. Points are colored by cluster assignment, and champion names are labeled. Axes are unitless layout coordinates; only the relative positions of points carry information.</p>
+
+    <div class="divider"></div>
+
+    <!-- 3. ROLE WIN PROFILES -->
+    <div class="section-head">
+      <span class="section-number">// 03</span>
       <h2>Role Win Profiles</h2>
     </div>
     <div class="highlight-box">
-      <p>Mean per-champion coefficient grouped by role. Each champion contributes equally regardless of games played, so meta-popular picks don't dominate. Answers: "in aggregate, what stats matter most for winning when playing Top vs. Jungle vs. Mid vs. ADC vs. Support?"</p>
+      <p>Mean per-champion coefficient grouped by role. Each champion contributes equally regardless of games played, so meta-popular picks do not dominate the average. This view answers, in aggregate, what stats matter most for winning when playing Top, Jungle, Mid, ADC, or Support.</p>
     </div>
     <div id="plot-role-profiles" class="plot-wrap" style="height:520px;"></div>
-    <p class="plot-caption">Role Win Profiles — grouped bar chart of average standardized coefficient by role. Features ordered by overall magnitude (left = most important globally).</p>
+    <p class="plot-caption">Role Win Profiles: grouped bar chart of average standardized coefficient by role. Features are ordered by overall magnitude, with the most important globally on the left.</p>
 
     <div class="divider"></div>
 
-    <!-- 5. WITHIN-ROLE CLUSTER DIFFERENCES -->
+    <!-- 4. WITHIN-ROLE CLUSTER DIFFERENCES -->
     <div class="section-head">
-      <span class="section-number">// 05</span>
-      <h2>Within-Role Cluster Differences</h2>
+      <span class="section-number">// 04</span>
+      <h2>Within-Role Sub-Archetype Differences</h2>
     </div>
     <div class="highlight-box">
-      <p>For each role, the top 6 features where clusters disagree most (highest inter-cluster variance on centroid means). This reveals what actually separates, e.g., SUP-0 from SUP-1 from SUP-2 — the mechanical distinctions between sub-archetypes within a role.</p>
+      <p>For each role, this view shows the top features where sub-groups disagree most, measured by the highest inter-group variance on centroid means. It surfaces the mechanical distinctions between playstyles within a single role, for example what separates one support sub-archetype from another.</p>
     </div>
     <div id="plot-within-role" class="plot-wrap" style="height:1400px;"></div>
-    <p class="plot-caption">Within-role cluster differences. Each subplot shows the top discriminating features for that role's clusters. Features sorted left-to-right by inter-cluster variance.</p>
+    <p class="plot-caption">Within-role sub-archetype differences. Each subplot shows the top discriminating features for that role's sub-groups. Features are sorted left to right by inter-group variance.</p>
 
     <div class="divider"></div>
 
-    <!-- CASE STUDY (existing) -->
+    <!-- 5. RIOT CLASS VS CLUSTER -->
+    <div class="section-head">
+      <span class="section-number">// 05</span>
+      <h2>Riot Class vs. Data-Driven Cluster</h2>
+    </div>
+    <div class="highlight-box">
+      <p>Riot Games tags every champion with an official class such as Marksman, Burst, Diver, Skirmisher, or Enchanter. Those tags were never used as inputs to our pipeline. The chart below crosses our per-role clusters against those Riot tags to ask, directly: did the data-driven clusters just rediscover Riot's labels, or do they cut the roster differently?</p>
+    </div>
+    <div id="plot-class-vs-cluster" class="plot-wrap" style="height:520px;"></div>
+    <p class="plot-caption">Stacked bar chart of (champion, role) entities grouped by per-role cluster, colored by Riot's official class tag. Bar height is the size of the cluster. Single-color bars are clusters where one Riot class dominates; mixed bars are clusters where the data-driven grouping cuts across several Riot tags.</p>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Where the Clusters Agree With Riot</h3>
+        <p>Some clusters are almost pure recoveries of a single Riot class. ADC-0 contains 20 of the 23 tagged Marksmen and almost nothing else. ADC-1 is the long-range siege cluster, all Artillery and Burst. MID-1 is a clean caster cluster, dominated by Burst mages with a few Battlemages mixed in. SUP-1 is the enchanter cluster, with Enchanter the most common tag. In these cases the model independently recovered a category that Riot already named, which is reassuring evidence that the per-(champion, role) coefficients carry real archetype signal.</p>
+      </div>
+      <div class="card">
+        <h3>Where the Clusters Disagree With Riot</h3>
+        <p>Several clusters cut across Riot's tags in a way the flat labels do not. JGL-0 lumps Assassins, Divers, and Skirmishers together as the "aggressive engage jungler" archetype, with JGL-1 collecting the more utility-leaning specialists and catchers. TOP-1 mixes Juggernauts, Divers, Skirmishers, and Specialists into a single "mobile bruiser" cluster. The other direction also shows up: Skirmishers are split across five different clusters (JGL-0, JGL-1, MID-0, TOP-0, TOP-1) because the same tag plays very differently depending on role and partner kit. These are the places where the data-driven grouping is doing something Riot's flat class system cannot.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 6. CASE STUDY -->
     <div class="section-head">
       <span class="section-number">// 06</span>
       <h2>Case Study: Jinx, Sivir, Ezreal</h2>
     </div>
     <div class="card">
       <h3>Three Marksmen, Three Win Profiles</h3>
-      <p>All three are Marksmen (ADC archetype), yet their logistic regression coefficients differ substantially. Jinx is the most KDA-dependent; Sivir shows stronger reliance on nonCsGold and assistRatio; Ezreal shows uniquely high damageEfficiency, reflecting his skill-shot-reliant kit that rewards precision over raw damage volume.</p>
+      <p>All three are Marksmen in the ADC archetype, yet their logistic regression coefficients differ substantially. Jinx is the most KDA-dependent. Sivir shows stronger reliance on nonCsGold and assistRatio. Ezreal shows uniquely high damageEfficiency, reflecting a skill-shot-reliant kit that rewards precision over raw damage volume.</p>
     </div>
     <div id="plot-analysis-coef" class="plot-wrap" style="height:500px;"></div>
-    <p class="plot-caption">Coefficient Comparison — Jinx, Sivir, Ezreal. Grouped bar chart of standardized logistic regression coefficients. Despite being the same Riot archetype (Marksman), each champion's win profile shows distinct feature emphases.</p>
+    <p class="plot-caption">Coefficient comparison for Jinx, Sivir, and Ezreal: grouped bar chart of standardized logistic regression coefficients. Despite belonging to the same Riot archetype (Marksman), each champion's win profile shows distinct feature emphases.</p>
     <div id="plot-analysis-zscore" class="plot-wrap" style="height:500px;"></div>
-    <p class="plot-caption">Z-Score Comparison — how each champion's average stats deviate from the global Challenger mean. Dashed lines at ±1σ. Jinx and Sivir both show physicalDamageRatio well above +1σ, clearly separating them from mages in the same dataset.</p>
-    <div id="plot-analysis-cluster" class="plot-wrap" style="height:520px;"></div>
-    <p class="plot-caption">PCA scatter colored by cluster. The separation is meaningful but not perfectly clean — reflecting that champion archetypes genuinely overlap in win conditions.</p>
-  </section>
+    <p class="plot-caption">Z-score comparison showing how each champion's average stats deviate from the global Challenger mean. Dashed lines mark ±1σ. Jinx and Sivir both show physicalDamageRatio well above +1σ, clearly separating them from mages in the same dataset.</p>
 
-  <!-- ════ TAB: RESULTS ════ -->
-  <section class="tab-panel" id="tab-results">
+    <div class="section-head" style="margin-top:2rem;">
+      <span class="section-number">// MAKE YOUR OWN</span>
+      <h2>Build a Custom Case Study</h2>
+    </div>
+    <div class="card">
+      <p style="color:var(--muted); font-size:0.9rem;">Pick 2 to 8 champions to compare side by side. Select a champion from the dropdown to add it to the list, and click the × on a chip to remove it. Switch between standardized coefficients and z-scores against the Challenger mean using the View dropdown.</p>
+    </div>
+    <div class="control-bar">
+      <label>Add champion:</label>
+      <select id="customCaseAdd" onchange="addCustomCaseChamp()">
+        <option value="">— Select to add —</option>
+      </select>
+      <label style="margin-left:1rem">View:</label>
+      <select id="customCaseView" onchange="updateCustomCase()">
+        <option value="coef">Model Coefficients</option>
+        <option value="zscore">Z-Scores vs. Global Mean</option>
+      </select>
+      <span id="customCaseStatus" style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--muted); margin-left:1rem;"></span>
+    </div>
+    <div style="margin: 0.75rem 0 1rem;">
+      <label style="display:block; font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.4rem;">Selected champions</label>
+      <div id="customCaseChips" class="chip-list"></div>
+    </div>
+    <div id="plot-custom-case" class="plot-wrap" style="height:500px;"></div>
+    <p class="plot-caption">Custom comparison of the selected champions. Bars are grouped by feature, with one color per champion. Coefficient view shows what predicts winning for each champion; z-score view shows how each champion's average stats compare to the overall Challenger mean.</p>
+
+    <div class="divider"></div>
+
+    <!-- ANSWERS TO THE 3 RESEARCH QUESTIONS -->
     <div class="section-head">
-      <span class="section-number">// MAJOR FINDINGS</span>
-      <h2>Results &amp; Interpretations</h2>
+      <span class="section-number">// REVISITING THE QUESTIONS</span>
+      <h2>What the Analysis Tells Us</h2>
     </div>
+    <p style="color:var(--muted); font-size:0.92rem; margin-bottom:1.5rem;">The Project Objective tab posed three questions. The following points summarize what the per-champion models, the win-profile heatmap, the role-mean bars, and the MDS layout together say about each one.</p>
 
-    <div class="stat-grid">
-      <div class="stat-box"><span class="value">172</span><span class="label">Champions Modeled</span></div>
-      <div class="stat-box"><span class="value">92%</span><span class="label">Mean AUC</span></div>
-      <div class="stat-box"><span class="value">6</span><span class="label">Win-Profile Clusters</span></div>
-      <div class="stat-box"><span class="value">50.3%</span><span class="label">PCA Variance (2PC)</span></div>
+    <div class="q-grid">
+      <div class="q-card">
+        <div class="q-num">Answer 01</div>
+        <h3>Performance Stats and Win Probability</h3>
+        <p>Performance stats are strongly predictive of winning at Challenger, with a mean AUC of 0.92 (range 0.86 to 0.96) across the roster. The predictive features are decisively role-dependent, which confirms the original hypothesis. KDA and nonCsGold dominate for carries, while mitigationRatio and totalTimeCCDealt dominate for tanks and supports. There is no universal "kills win games" rule, and the Role Win Profiles bar chart and per-champion coefficients make this concrete.</p>
+      </div>
+      <div class="q-card">
+        <div class="q-num">Answer 02</div>
+        <h3>Clustering by Win Profile</h3>
+        <p>Yes. Clustering the 172 by 16 coefficient matrix yields stable groups that align with broad archetypes such as marksmen, mages, divers, engage supports, utility supports, and melee fighters, without ever using Riot's role labels as input. The Champion Win Profiles heatmap shows that champions with adjacent profiles share similar mixes of damage, mitigation, and crowd-control features, which confirms that win conditions cluster meaningfully on their own.</p>
+      </div>
+      <div class="q-card">
+        <div class="q-num">Answer 03</div>
+        <h3>Clusters and Official Archetypes</h3>
+        <p>Alignment with Riot's classifications is partial, and that is the informative finding. The Per-Role MDS layout shows that official role still organizes most of the variation, with each role's champions forming clear groupings on its panel. However, the data-driven clusters split each role into sub-archetypes that Riot's flat labels collapse, such as poke ADCs versus dive ADCs, or engage supports versus enchanters. Complete agreement would have meant we just rediscovered known labels, and the divergences are where the more novel structure lives.</p>
+      </div>
     </div>
-
-    <div class="text-block">
-      <h3>Finding 1 — Win Conditions Are Champion-Specific</h3>
-      <p>No single universal set of statistics predicts winning. Each champion has a distinct win profile shaped by their role and kit. KDA dominates for carries; mitigationRatio and totalTimeCCDealt dominate for tanks and supports. Using kills alone to evaluate performance is fundamentally flawed at the Challenger level.</p>
-    </div>
-    <div class="text-block">
-      <h3>Finding 2 — Six Meaningful Win-Profile Clusters Emerge</h3>
-      <p>K-Means on coefficient vectors reveals six natural groups. These broadly reflect role archetypes, validating that the coefficient-based approach captures real role structure. Partial — not complete — alignment with official classifications is actually informative: complete agreement would mean we just rediscovered known labels.</p>
-    </div>
-    <div class="text-block">
-      <h3>Finding 3 — High Model Accuracy Across the Board</h3>
-      <p>Mean AUC of 0.92 with range 0.86–0.96 across 172 champions demonstrates that in Challenger play, in-game performance stats are highly predictive of match outcome. This validates the feature set and suggests that at the highest level of play, macro-level performance (not just luck) drives results.</p>
-    </div>
-
-    <div id="plot-results-auc" class="plot-wrap" style="height:420px;"></div>
-    <p class="plot-caption">AUC distribution across all 172 champion models. The tight range (0.86–0.96) with mean ≈ 0.92 indicates consistent predictive power. Champions with lower AUC tend to have fewer games or more chaotic playstyles (e.g., assassins with high game-to-game variance).</p>
 
     <div class="divider"></div>
 
@@ -561,15 +692,16 @@
     <div class="two-col">
       <div class="card">
         <h3>Confounding: Game State</h3>
-        <p>Stats like deaths may reflect the team being behind, not be the cause of losing. Future models should incorporate game-state variables — gold differential timelines, objective control sequences — to better isolate causal vs. correlational effects.</p>
+        <p>Stats like deaths may reflect a team being behind, rather than being the cause of losing. Future models should incorporate game-state variables such as gold differential timelines and objective control sequences, in order to better separate causal effects from correlational ones.</p>
       </div>
       <div class="card">
-        <h3>Feature &amp; Model Expansion</h3>
-        <p>Clustering quality can be improved with richer features: itemization patterns, positional heatmaps, patch version controls. Non-linear models (gradient boosting, neural networks) could capture interaction effects invisible to logistic regression.</p>
+        <h3>Feature and Model Expansion</h3>
+        <p>Grouping quality can be improved with richer features such as itemization patterns, positional heatmaps, and patch version controls. Non-linear models like gradient boosting or neural networks could capture interaction effects that are invisible to logistic regression.</p>
       </div>
     </div>
-    <div class="highlight-box">
-      <p><strong>Practical Application:</strong> Players and coaches can use champion-specific benchmarks to set meaningful performance targets. A Jinx player should prioritize KDA and nonCsGold; a Braum player should focus on crowd control uptime and mitigationRatio — not kills. This analysis makes those distinctions data-driven and quantifiable.</p>
+    <div class="card">
+      <h3>Challenger-Only Sample</h3>
+      <p>The dataset is restricted to Challenger-tier matches. The original intent was that high-elo data would make it easier to capture the "essence" of each champion, since better players tend to play their champions the way the kits are designed. In practice this may have made inference harder in some cases. For example, Jinx shows a negative coefficient on CS, which probably reflects that Challenger Jinx players almost always have high farm anyway, and the games that swing on something are the ones won through kills, turrets, and objectives. There is no way to confirm this from a single elo band, so a wider range of ranks is needed to disentangle skill-floor effects from genuine win conditions.</p>
     </div>
   </section>
 
@@ -596,12 +728,12 @@ const C = {
 };
 const CLUSTER_COLORS = [C.c0, C.c4, C.c2, C.c3, C.c1, C.c5];
 const CLUSTER_NAMES = [
-  'Cluster 0: Support Engagers',
-  'Cluster 1: Melee Fighters',
-  'Cluster 2: Marksmen / ADC',
-  'Cluster 3: Utility Supports',
-  'Cluster 4: Divers / Skirmishers',
-  'Cluster 5: Mages'
+  'Support Engagers',
+  'Melee Fighters',
+  'Marksmen / ADC',
+  'Utility Supports',
+  'Divers / Skirmishers',
+  'Mages'
 ];
 
 const BASE = {
@@ -633,11 +765,9 @@ const METRICS = {"Ezreal": {"n_games": 13094, "auc": 0.9308531488092742}, "Ambes
 
 // ── RENDER DISPATCH ────────────────────────────────────────────
 function renderTab(name) {
-  if (name === 'summary') {} // no plots
-  else if (name === 'eda') renderEDA();
-  else if (name === 'model') renderModel();
-  else if (name === 'analysis') renderAnalysis();
-  else if (name === 'results') renderResults();
+  if (name === 'objective') renderEDA();
+  else if (name === 'methods') renderModel();
+  else if (name === 'findings') renderAnalysis();
 }
 
 // ── EDA ───────────────────────────────────────────────────────
@@ -658,16 +788,6 @@ function renderEDA() {
     height:540, margin:{l:185,r:80,t:70,b:150}
   }), CFG);
 
-  Plotly.newPlot('plot-eda-winrate', [{
-    type:'histogram', x:AUCS, nbinsx:22,
-    marker:{color:'#5eead4', opacity:0.85, line:{color:'#0d1117', width:0.5}},
-    hovertemplate:'AUC: %{x:.3f}<br>Count: %{y}<extra><\/extra>'
-  }], L({
-    title:{text:'<b>AUC Distribution<\/b> — Per-Champion Logistic Regression Models (n=172)',font:{size:16}},
-    xaxis:{title:{text:'AUC-ROC Score'}},
-    yaxis:{title:{text:'Number of Champions'}},
-    height:420, margin:{l:70,r:40,t:70,b:60}
-  }), CFG);
 }
 
 // ── MODEL ─────────────────────────────────────────────────────
@@ -688,14 +808,25 @@ function renderModel() {
     textfont:{size:7, color:CLUSTER_COLORS[+k]},
     name: CLUSTER_NAMES[+k],
     marker:{color:CLUSTER_COLORS[+k], size:9, opacity:0.85, line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
-    hovertemplate:'<b>%{text}<\/b><br>PC1: %{x:.3f}, PC2: %{y:.3f}<extra><\/extra>'
+    hovertemplate:'<b>%{text}<\/b><extra><\/extra>'
   }));
 
   Plotly.newPlot('plot-model-pca', pcaTraces, L({
-    title:{text:`<b>Global PCA — Champion Win Profiles<\/b>  PC1=${PCA_VAR[0]}%  PC2=${PCA_VAR[1]}%`,font:{size:16}},
-    xaxis:{title:{text:`PC1 (${PCA_VAR[0]}% variance explained)`}},
-    yaxis:{title:{text:`PC2 (${PCA_VAR[1]}% variance explained)`}},
-    height:580, margin:{l:70,r:220,t:70,b:60}
+    title:{text:'<b>Global MDS: Champion Win Profiles</b>',font:{size:16}},
+    xaxis:{title:{text:''}, showticklabels:false, zeroline:false},
+    yaxis:{title:{text:''}, showticklabels:false, zeroline:false},
+    height:580, margin:{l:50,r:220,t:70,b:40}
+  }), CFG);
+
+  Plotly.newPlot('plot-results-auc', [{
+    type:'histogram', x:AUCS, nbinsx:22,
+    marker:{color:'#5eead4', opacity:0.85, line:{color:'#0d1117', width:0.5}},
+    hovertemplate:'AUC: %{x:.3f}<br>Count: %{y}<extra><\/extra>'
+  }], L({
+    title:{text:'<b>Model AUC Distribution<\/b>: 172 Champions',font:{size:16}},
+    xaxis:{title:{text:'AUC-ROC Score'}},
+    yaxis:{title:{text:'Number of Champions'}},
+    height:420, margin:{l:70,r:40,t:70,b:60}
   }), CFG);
 
   updateChampChart();
@@ -712,8 +843,8 @@ function updateChampChart() {
   const n = METRICS[sel] ? METRICS[sel].n_games.toLocaleString() : 'N/A';
   const yLabel = isCoef ? 'Standardized Coefficient' : 'Z-Score (σ from global mean)';
   const titleText = isCoef
-    ? `<b>${sel}<\/b> — Coefficient Bar Chart`
-    : `<b>${sel}<\/b> — Z-Score vs. Global Challenger Mean`;
+    ? `<b>${sel}<\/b>: Coefficient Bar Chart`
+    : `<b>${sel}<\/b>: Z-Score vs. Global Challenger Mean`;
 
   Plotly.newPlot('plot-champ-coef', [{
     type:'bar', x:FEATURES, y:vals,
@@ -746,8 +877,11 @@ const CLUSTER_PALETTE = ['#5eead4','#fb7185','#fbbf24','#a78bfa','#60a5fa','#f47
   '#2dd4bf','#e11d48','#d97706','#7c3aed','#2563eb','#db2777','#059669','#ea580c','#dc2626','#7e22ce',
   '#0891b2','#be185d','#92400e','#5b21b6','#1d4ed8'];
 const ALL_LABELS_NEW = [...new Set(GLOBAL_PCA_DATA2.map(d => d.cluster_label))].sort();
+const PER_ROLE_LABEL_SET = new Set();
+Object.values(PER_ROLE_PCA_DATA).forEach(info => (info.clusters || []).forEach(c => PER_ROLE_LABEL_SET.add(c)));
+const ALL_LABELS_UNION = [...new Set([...ALL_LABELS_NEW, ...PER_ROLE_LABEL_SET])].sort();
 const LABEL_COLOR = {};
-ALL_LABELS_NEW.forEach((lbl,i) => LABEL_COLOR[lbl] = CLUSTER_PALETTE[i % CLUSTER_PALETTE.length]);
+ALL_LABELS_UNION.forEach((lbl,i) => LABEL_COLOR[lbl] = CLUSTER_PALETTE[i % CLUSTER_PALETTE.length]);
 
 function renderGlobalPCA() {
   const byCluster = {};
@@ -767,7 +901,7 @@ function renderGlobalPCA() {
     hovertemplate:'<b>%{text}<\/b><br>Role: ' + (byCluster[k].role[0]||'') + '<br>Cluster: '+k+'<br>PC1: %{x:.3f}, PC2: %{y:.3f}<extra><\/extra>'
   }));
   Plotly.newPlot('plot-global-pca', traces, L({
-    title:{text:`<b>Global PCA<\/b> — All Champions (role differences dominate) &nbsp; PC1=${GLOBAL_PCA_VAR2[0]}%  PC2=${GLOBAL_PCA_VAR2[1]}%`,font:{size:16}},
+    title:{text:`<b>Global PCA<\/b>: All Champions (role differences dominate) &nbsp; PC1=${GLOBAL_PCA_VAR2[0]}%  PC2=${GLOBAL_PCA_VAR2[1]}%`,font:{size:16}},
     xaxis:{title:{text:`PC1 (${GLOBAL_PCA_VAR2[0]}% variance explained)`}},
     yaxis:{title:{text:`PC2 (${GLOBAL_PCA_VAR2[1]}% variance explained)`}},
     height:700, margin:{l:70,r:220,t:80,b:60},
@@ -778,16 +912,11 @@ function renderGlobalPCA() {
 function renderPerRolePCA() {
   const roles = ROLE_ORDER.filter(r => PER_ROLE_PCA_DATA[r]);
   const nCols = 2, nRows = Math.ceil(roles.length / nCols);
-  const subTitles = roles.map(r => {
-    const v = PER_ROLE_PCA_DATA[r].var;
-    return `<b>${r}<\/b>  (PC1=${v[0]}%, PC2=${v[1]}%)`;
-  });
   // Build data per subplot
   const traces = [];
-  const layoutAnnotations = [];
+  const seenLabels = new Set();
   roles.forEach((role, idx) => {
     const info = PER_ROLE_PCA_DATA[role];
-    const r = Math.floor(idx/nCols)+1, c = (idx%nCols)+1;
     const xaxis = idx===0 ? 'x' : `x${idx+1}`;
     const yaxis = idx===0 ? 'y' : `y${idx+1}`;
     // Group by cluster
@@ -800,34 +929,43 @@ function renderPerRolePCA() {
       byCl[lbl].text.push(champ);
     });
     Object.keys(byCl).sort().forEach(lbl => {
+      const showInLegend = !seenLabels.has(lbl);
+      seenLabels.add(lbl);
       traces.push({
         type:'scatter', mode:'markers+text',
         x:byCl[lbl].x, y:byCl[lbl].y,
         text:byCl[lbl].text, textposition:'top center',
         textfont:{size:7, color:LABEL_COLOR[lbl]||'#aaa'},
-        name:lbl, legendgroup:lbl, showlegend: idx===0,
+        name:lbl, legendgroup:lbl, showlegend: showInLegend,
         marker:{color:LABEL_COLOR[lbl]||'#aaa', size:8, line:{width:0.5,color:'rgba(255,255,255,0.4)'}},
         xaxis:xaxis, yaxis:yaxis,
-        hovertemplate:`<b>%{text}<\/b><br>Cluster: ${lbl}<extra><\/extra>`
+        hovertemplate:`<b>%{text}</b><br>Cluster: ${lbl}<extra></extra>`
       });
     });
   });
+  // Hide tick labels and axis titles on all subplots since MDS axes are unitless
+  const axisStyle = {showticklabels:false, title:{text:''}, zeroline:false};
   const layout = L({
-    title:{text:'<b>Per-Role PCA<\/b> — within-role champion variation (one PCA per role)', font:{size:16}},
+    title:{text:'<b>Per-Role MDS</b>: within-role champion variation (one MDS layout per role)', font:{size:16}},
     legend:{title:{text:'Cluster'},font:{size:9}},
-    height:900, margin:{l:60,r:160,t:90,b:60},
+    height:900, margin:{l:40,r:160,t:90,b:40},
     grid:{rows:nRows, columns:nCols, pattern:'independent'}
   });
-  // Add subplot titles as annotations
+  for (let i = 1; i <= roles.length; i++) {
+    const xKey = i === 1 ? 'xaxis' : `xaxis${i}`;
+    const yKey = i === 1 ? 'yaxis' : `yaxis${i}`;
+    layout[xKey] = Object.assign({}, BASE.xaxis, axisStyle);
+    layout[yKey] = Object.assign({}, BASE.yaxis, axisStyle);
+  }
+  // Add subplot titles as annotations (role name only — no variance %)
   roles.forEach((role, idx) => {
-    const v = PER_ROLE_PCA_DATA[role].var;
     const xref = idx===0?'x domain':`x${idx+1} domain`;
     const yref = idx===0?'y domain':`y${idx+1} domain`;
     layout.annotations = layout.annotations || [];
     layout.annotations.push({
-      text:`<b>${role}<\/b>  PC1=${v[0]}%  PC2=${v[1]}%`,
-      xref:xref, yref:yref, x:0.5, y:1.1,
-      showarrow:false, font:{size:11, color:'#e6edf3'}, xanchor:'center'
+      text:`<b>${role}</b>`,
+      xref:xref, yref:yref, x:0.5, y:1.08,
+      showarrow:false, font:{size:12, color:'#e6edf3'}, xanchor:'center'
     });
   });
   Plotly.newPlot('plot-per-role-pca', traces, layout, CFG);
@@ -863,7 +1001,7 @@ function renderChampHeatmap() {
   };
   
   Plotly.newPlot('plot-champ-heatmap', [trace], L({
-    title:{text:'<b>Champion Win Profiles<\/b> — Clustered Heatmap (Ward linkage ordering)', font:{size:16}},
+    title:{text:'<b>Champion Win Profiles<\/b>: Clustered Heatmap (Ward linkage ordering)', font:{size:16}},
     xaxis:{tickangle:-35, title:{text:'Feature'}, tickfont:{size:9}},
     yaxis:{title:{text:'Champion'}, autorange:'reversed', tickfont:{size:8}},
     height: Math.max(500, champs.length*16),
@@ -889,7 +1027,7 @@ function renderRoleProfiles() {
   
   Plotly.newPlot('plot-role-profiles', traces, L({
     barmode:'group',
-    title:{text:'<b>Role Win Profiles<\/b> — average per-champion coefficient by role', font:{size:16}},
+    title:{text:'<b>Role Win Profiles<\/b>: average per-champion coefficient by role', font:{size:16}},
     xaxis:{tickangle:-35, title:{text:'Feature'}},
     yaxis:{title:{text:'Mean Standardized Coefficient'}},
     legend:{title:{text:'Role'}},
@@ -921,7 +1059,7 @@ function renderWithinRole() {
   });
   const layout = L({
     barmode:'group',
-    title:{text:'<b>Within-Role Cluster Differences<\/b> — top features where clusters disagree most', font:{size:15}},
+    title:{text:'<b>Within-Role Cluster Differences<\/b>: top features where clusters disagree most', font:{size:15}},
     height: 320*nRows+150,
     margin:{l:60,r:160,t:80,b:60},
     legend:{title:{text:'Cluster'}, font:{size:9}},
@@ -944,14 +1082,63 @@ function renderWithinRole() {
   Plotly.newPlot('plot-within-role', traces, layout, CFG);
 }
 
+// ── RIOT CLASS VS CLUSTER ─────────────────────────────────────
+// Data extracted from notebook output: counts of each Riot class within each per-role cluster
+const CLASS_VS_CLUSTER = {
+  clusters: ['ADC-0','ADC-1','JGL-0','JGL-1','MID-0','MID-1','SUP-0','SUP-1','SUP-2','TOP-0','TOP-1'],
+  classes: ['Marksman','Artillery','Burst','Battlemage','Assassin','Skirmisher','Diver','Juggernaut','Specialist','Vanguard','Warden','Catcher','Enchanter'],
+  // counts[class][cluster] in same order as arrays above
+  counts: {
+    Marksman:    [20, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    Artillery:   [0, 3, 1, 0, 2, 2, 0, 0, 0, 0, 1],
+    Burst:       [0, 1, 0, 0, 0, 8, 1, 2, 0, 0, 0],
+    Battlemage:  [1, 0, 0, 0, 3, 3, 0, 1, 0, 2, 0],
+    Assassin:    [0, 0, 8, 1, 5, 2, 0, 1, 0, 1, 0],
+    Skirmisher:  [0, 0, 4, 1, 2, 0, 0, 0, 0, 4, 3],
+    Diver:       [0, 0, 7, 1, 0, 0, 0, 0, 2, 0, 3],
+    Juggernaut:  [0, 0, 1, 1, 0, 0, 0, 0, 0, 3, 3],
+    Specialist:  [0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 3],
+    Vanguard:    [0, 0, 0, 0, 0, 0, 4, 0, 0, 3, 0],
+    Warden:      [0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0],
+    Catcher:     [0, 0, 0, 1, 0, 0, 3, 1, 0, 0, 0],
+    Enchanter:   [0, 0, 0, 0, 0, 0, 2, 5, 0, 0, 0],
+  }
+};
+const CLASS_COLORS = {
+  Marksman:'#f7768e', Artillery:'#e0af68', Burst:'#a78bfa', Battlemage:'#bb9af7',
+  Assassin:'#fb7185', Skirmisher:'#fb923c', Diver:'#f87171', Juggernaut:'#d97706',
+  Specialist:'#94a3b8', Vanguard:'#60a5fa', Warden:'#5eead4', Catcher:'#34d399',
+  Enchanter:'#fbbf24'
+};
+
+function renderClassVsCluster() {
+  const {clusters, classes, counts} = CLASS_VS_CLUSTER;
+  const traces = classes.map(cls => ({
+    type:'bar',
+    name:cls,
+    x:clusters,
+    y:counts[cls],
+    marker:{color:CLASS_COLORS[cls]||'#888', line:{color:'rgba(0,0,0,0.3)', width:0.5}},
+    hovertemplate:`<b>${cls}</b> in %{x}<br>Count: %{y}<extra></extra>`
+  }));
+  Plotly.newPlot('plot-class-vs-cluster', traces, L({
+    barmode:'stack',
+    title:{text:'<b>Riot Class Composition of Each Data-Driven Cluster</b>', font:{size:16}},
+    xaxis:{title:{text:'Per-Role Cluster'}, tickfont:{size:11}},
+    yaxis:{title:{text:'Number of (Champion, Role) Entities'}},
+    legend:{title:{text:'Riot Class'}, font:{size:10}},
+    height:520, margin:{l:70, r:180, t:70, b:80}
+  }), CFG);
+}
+
 
 // ── ANALYSIS ──────────────────────────────────────────────────
 function renderAnalysis() {
-  renderGlobalPCA();
   renderPerRolePCA();
   renderChampHeatmap();
   renderRoleProfiles();
   renderWithinRole();
+  renderClassVsCluster();
 
   const CASE = ['Jinx','Sivir','Ezreal'];
   const CASE_COLORS = [C.c4, C.c1, C.c2];
@@ -969,7 +1156,7 @@ function renderAnalysis() {
 
   Plotly.newPlot('plot-analysis-coef', coefTraces, L({
     barmode:'group',
-    title:{text:'<b>Coefficient Comparison<\/b> — Jinx, Sivir, Ezreal',font:{size:16}},
+    title:{text:'<b>Coefficient Comparison<\/b>: Jinx, Sivir, Ezreal',font:{size:16}},
     xaxis:{tickangle:-40, title:{text:'Feature'}, tickfont:{size:9}},
     yaxis:{title:{text:'Standardized Coefficient'}},
     legend:{title:{text:'Champion'}},
@@ -990,7 +1177,7 @@ function renderAnalysis() {
 
   Plotly.newPlot('plot-analysis-zscore', zTraces, L({
     barmode:'group',
-    title:{text:'<b>Z-Score Comparison<\/b> — Jinx, Sivir, Ezreal vs. Global Challenger Mean',font:{size:16}},
+    title:{text:'<b>Z-Score Comparison<\/b>: Jinx, Sivir, Ezreal vs. Global Challenger Mean',font:{size:16}},
     xaxis:{tickangle:-40, title:{text:'Feature'}, tickfont:{size:9}},
     yaxis:{title:{text:'Z-Score (σ from mean)'}},
     legend:{title:{text:'Champion'}},
@@ -1004,51 +1191,135 @@ function renderAnalysis() {
     height:500
   }), CFG);
 
-  // Cluster PCA (same as model but with labels)
-  const byCluster = {};
-  PCA_DATA.forEach(r => {
-    if (!byCluster[r.cluster]) byCluster[r.cluster] = {x:[],y:[],text:[]};
-    byCluster[r.cluster].x.push(parseFloat(r.PC1.toFixed(4)));
-    byCluster[r.cluster].y.push(parseFloat(r.PC2.toFixed(4)));
-    byCluster[r.cluster].text.push(r.champion);
-  });
-
-  const clusterTraces = Object.keys(byCluster).sort((a,b)=>+a-+b).map(k => ({
-    type:'scatter', mode:'markers+text',
-    x: byCluster[k].x, y: byCluster[k].y,
-    text: byCluster[k].text,
-    textposition:'top center',
-    textfont:{size:7, color:CLUSTER_COLORS[+k]},
-    name: CLUSTER_NAMES[+k],
-    marker:{color:CLUSTER_COLORS[+k], size:9, opacity:0.85, line:{width:0.5,color:'rgba(255,255,255,0.3)'}},
-    hovertemplate:'<b>%{text}<\/b><br>PC1: %{x:.3f}, PC2: %{y:.3f}<extra><\/extra>'
-  }));
-
-  Plotly.newPlot('plot-analysis-cluster', clusterTraces, L({
-    title:{text:'<b>PCA — Champion Clusters<\/b>  (hover for champion name)',font:{size:16}},
-    xaxis:{title:{text:`PC1 (${PCA_VAR[0]}%)`}},
-    yaxis:{title:{text:`PC2 (${PCA_VAR[1]}%)`}},
-    height:520, margin:{l:70,r:220,t:70,b:60}
-  }), CFG);
+  setupCustomCase();
 }
 
-// ── RESULTS ───────────────────────────────────────────────────
-function renderResults() {
-  Plotly.newPlot('plot-results-auc', [{
-    type:'histogram', x:AUCS, nbinsx:22,
-    marker:{color:'#5eead4', opacity:0.85, line:{color:'#0d1117', width:0.5}},
-    hovertemplate:'AUC: %{x:.3f}<br>Count: %{y}<extra><\/extra>'
-  }], L({
-    title:{text:'<b>Model AUC Distribution<\/b> — 172 Champions',font:{size:16}},
-    xaxis:{title:{text:'AUC-ROC Score'}},
-    yaxis:{title:{text:'Number of Champions'}},
-    height:420, margin:{l:70,r:40,t:70,b:60}
+// ── CUSTOM CASE STUDY ─────────────────────────────────────────
+const CUSTOM_CASE_COLORS = ['#5eead4','#fb7185','#fbbf24','#a78bfa','#60a5fa','#f472b6','#34d399','#fb923c'];
+const MAX_CUSTOM_CASE = 8;
+let CUSTOM_CASE_ALL_CHAMPS = [];
+let customCaseSelected = ['Jinx','Sivir','Ezreal'];
+let customCaseInitialized = false;
+
+function setupCustomCase() {
+  if (customCaseInitialized) return;
+  const sourceSel = document.getElementById('champSelect');
+  if (!sourceSel) return;
+  CUSTOM_CASE_ALL_CHAMPS = Array.from(sourceSel.options).map(o => o.value);
+  customCaseInitialized = true;
+  rebuildCustomCaseUI();
+}
+
+function rebuildCustomCaseUI() {
+  const addSel = document.getElementById('customCaseAdd');
+  const chips = document.getElementById('customCaseChips');
+  if (!addSel || !chips) return;
+  const atMax = customCaseSelected.length >= MAX_CUSTOM_CASE;
+  addSel.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = atMax ? '— Maximum reached (8) —' : '— Select to add —';
+  addSel.appendChild(placeholder);
+  addSel.disabled = atMax;
+  if (!atMax) {
+    CUSTOM_CASE_ALL_CHAMPS.filter(c => !customCaseSelected.includes(c)).forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      addSel.appendChild(o);
+    });
+  }
+  chips.innerHTML = '';
+  if (customCaseSelected.length === 0) {
+    const empty = document.createElement('span');
+    empty.className = 'chip-empty';
+    empty.textContent = 'No champions selected yet. Add at least 2 from the dropdown above.';
+    chips.appendChild(empty);
+  } else {
+    customCaseSelected.forEach((c, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.style.borderColor = CUSTOM_CASE_COLORS[i % CUSTOM_CASE_COLORS.length];
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = c;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.title = `Remove ${c}`;
+      btn.textContent = '×';
+      btn.onclick = () => removeCustomCaseChamp(c);
+      chip.appendChild(nameSpan);
+      chip.appendChild(btn);
+      chips.appendChild(chip);
+    });
+  }
+  updateCustomCase();
+}
+
+function addCustomCaseChamp() {
+  const addSel = document.getElementById('customCaseAdd');
+  const val = addSel.value;
+  if (!val) return;
+  if (customCaseSelected.length >= MAX_CUSTOM_CASE) { addSel.value = ''; return; }
+  if (!customCaseSelected.includes(val)) customCaseSelected.push(val);
+  addSel.value = '';
+  rebuildCustomCaseUI();
+}
+
+function removeCustomCaseChamp(name) {
+  customCaseSelected = customCaseSelected.filter(c => c !== name);
+  rebuildCustomCaseUI();
+}
+
+function updateCustomCase() {
+  const viewSel = document.getElementById('customCaseView');
+  const status = document.getElementById('customCaseStatus');
+  if (!viewSel || !status) return;
+  const isCoef = viewSel.value === 'coef';
+
+  if (customCaseSelected.length < 2) {
+    status.textContent = `Add at least 2 champions (currently ${customCaseSelected.length})`;
+    status.style.color = 'var(--accent2)';
+    Plotly.purge('plot-custom-case');
+    return;
+  }
+  status.textContent = `${customCaseSelected.length} champion${customCaseSelected.length===1?'':'s'} selected`;
+  status.style.color = 'var(--muted)';
+
+  const traces = customCaseSelected.map((c, i) => {
+    const data = (isCoef ? ALL_COEFS[c] : ALL_ZSCORES[c]) || {};
+    return {
+      type:'bar', name:c,
+      x:FEATURES, y:FEATURES.map(f => data[f] || 0),
+      marker:{color:CUSTOM_CASE_COLORS[i % CUSTOM_CASE_COLORS.length]},
+      hovertemplate:`<b>${c}</b><br>%{x}: %{y:.3f}${isCoef ? '' : 'σ'}<extra></extra>`
+    };
+  });
+  const yLabel = isCoef ? 'Standardized Coefficient' : 'Z-Score (σ from global mean)';
+  const titleText = isCoef
+    ? '<b>Coefficient Comparison</b>: Custom Case Study'
+    : '<b>Z-Score Comparison</b>: Custom Case Study (vs. Challenger Mean)';
+  const shapes = isCoef
+    ? [{type:'line', x0:-0.5, x1:15.5, y0:0, y1:0, line:{color:'rgba(255,255,255,0.2)', width:1}}]
+    : [
+        {type:'line', x0:-0.5, x1:15.5, y0:0, y1:0, line:{color:'rgba(255,255,255,0.2)', width:1}},
+        {type:'line', x0:-0.5, x1:15.5, y0:1, y1:1, line:{color:'rgba(255,255,255,0.15)', width:1, dash:'dash'}},
+        {type:'line', x0:-0.5, x1:15.5, y0:-1, y1:-1, line:{color:'rgba(255,255,255,0.15)', width:1, dash:'dash'}}
+      ];
+  Plotly.newPlot('plot-custom-case', traces, L({
+    barmode:'group',
+    title:{text:titleText, font:{size:16}},
+    xaxis:{tickangle:-40, title:{text:'Feature'}, tickfont:{size:9}},
+    yaxis:{title:{text:yLabel}},
+    shapes:shapes,
+    legend:{title:{text:'Champion'}},
+    height:500
   }), CFG);
 }
 
 
 // ── INIT ──────────────────────────────────────────────────────
-window.plotsRendered = {summary: true};
+window.plotsRendered = {};
+renderEDA();
+window.plotsRendered.objective = true;
 </script>
 </body>
 </html>
